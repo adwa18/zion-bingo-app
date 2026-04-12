@@ -1,18 +1,18 @@
 """
-Zebi Bingo — Flask Backend  +  Telegram Bot (merged, single process)
+Joker Bingo — Flask Backend + Telegram Bot (merged, single process)
 ======================================================================
 Running both Flask and the aiogram bot in one process means you only
 need ONE free Render Web Service — no Background Worker required.
 
 How it works:
-  • Gunicorn starts with --workers 1  (critical — see Procfile)
+  • Gunicorn starts with --workers 1 (critical — see Procfile)
   • At module load time, start_bot_thread() spawns a daemon thread
   • That thread owns its own asyncio event loop and runs the bot forever
   • Flask handles HTTP on the main thread pool as normal
 
 Database: auto-detects from DATABASE_URL environment variable.
   • If DATABASE_URL starts with postgres → uses psycopg2 (PostgreSQL)
-  • Otherwise                           → uses sqlite3  (local dev)
+  • Otherwise → uses sqlite3 (local dev)
 
 Environment variables:
   DATABASE_URL          — PostgreSQL connection string (Render sets this automatically)
@@ -65,7 +65,7 @@ logging.basicConfig(
     format='%(asctime)s | %(levelname)-8s | %(name)s | %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S',
 )
-logger = logging.getLogger('zebi_bingo')
+logger = logging.getLogger('joker_bingo')
 
 # ─── CONFIG ───────────────────────────────────────────────────────────────────
 app = Flask(__name__, static_folder='static')
@@ -93,10 +93,10 @@ REFERRAL_BONUS      = 20         # ETB per batch
 REFERRALS_PER_BONUS = 10         # new users per batch
 MIN_DEPOSIT      = 50
 MAX_DEPOSIT      = 5_000
-MIN_WITHDRAW     = 100
+MIN_WITHDRAW     = 200
 PAYMENT_ACCOUNTS = (
-    "🏦 <b>CBE:</b>     <code>1000340957688</code>  (Tewodros Ephrem)\n"
-    "📱 <b>Telebirr:</b> <code>0944156222</code>  (Tewodros Ephrem)"
+    "🏦 <b>CBE:</b>     <code>1000532982565</code>  (Tewodros Ephrem)\n"
+    "📱 <b>Telebirr:</b> <code>0913252238</code>  (Tewodros Ephrem)"
 )
 
 # Owner = first admin (or set OWNER_TG_ID env var separately)
@@ -136,6 +136,8 @@ else:
 
 # Pool is created lazily on first DB call — keeps Gunicorn from blocking at import
 _pg_pool = None
+
+
 _pg_pool_lock = __import__('threading').Lock()
 
 def _ensure_pool():
@@ -715,7 +717,7 @@ class GameEngine:
                     )
 
 # ══════════════════════════════════════════════════════════════════════════════
-#  API ROUTES  (unchanged logic — just using new query helpers)
+#  API ROUTES
 # ══════════════════════════════════════════════════════════════════════════════
 
 @app.route('/')
@@ -723,6 +725,21 @@ def serve_index():
     resp = send_from_directory('static', 'index.html')
     resp.headers['Cache-Control'] = 'no-cache'
     return resp
+
+@app.route('/api/debug-auth', methods=['POST'])
+def debug_auth():
+    """Temporary debug endpoint — shows exactly what tg_id the server sees."""
+    body    = request.json or {}
+    tg_user = body.get('tg_user') or get_tg_user_from_request()
+    tg_id   = str(tg_user.get('id', '')) if tg_user else 'NO_USER'
+    row     = query_db('SELECT id, username, tg_id FROM users WHERE tg_id=?', (tg_id,), one=True)
+    all_ids = [u['tg_id'] for u in query_db('SELECT tg_id FROM users ORDER BY id DESC LIMIT 5')]
+    return jsonify({
+        'seen_tg_id': tg_id,
+        'found_user': row['username'] if row else None,
+        'last_5_tg_ids': all_ids,
+        'tg_user_raw': tg_user,
+    })
 
 @app.route('/api/auth', methods=['POST'])
 def auth():
@@ -944,11 +961,12 @@ def get_game(gid):
         'SELECT bp.*, u.username FROM bingo_players bp '
         'JOIN users u ON bp.user_id=u.id WHERE bp.game_id=?', (gid,)
     )
+    active_players = [p for p in all_players if not p.get('kicked')]
     pot_units = sum(p.get('bet_paid', 1) for p in all_players)
     gm['players']      = [{'username': p['username'], 'picked_number': p['picked_number'],
                             'picked_number2': p.get('picked_number2'),
-                            'has_bingo': p['has_bingo']} for p in all_players]
-    gm['player_count'] = len(all_players)
+                            'has_bingo': p['has_bingo']} for p in active_players]
+    gm['player_count'] = len(active_players)
     gm['pot']          = pot_units * gm['bet_amount']
     gm['prize']        = int(gm['pot'] * (1 - HOUSE_CUT))
     my_row = next((p for p in all_players if p['user_id'] == user['id']), None)
@@ -980,7 +998,8 @@ def join_game(gid):
     existing = query_db(
         'SELECT * FROM bingo_players WHERE game_id=? AND user_id=?', (gid, user['id']), one=True
     )
-    if existing:
+    if existing and not existing.get('kicked'):
+        # Already in game and not kicked — return existing card
         return jsonify({
             'status':      'already_joined',
             'card':        json.loads(existing['card'] or '[]'),
@@ -988,6 +1007,38 @@ def join_game(gid):
             'marked_cells':json.loads(existing['marked_cells'] or '[[2,2]]'),
             'marked2':     json.loads(existing.get('marked2') or '[[2,2]]'),
         }), 200
+    if existing and existing.get('kicked'):
+        # Player left earlier — only allow rejoin during waiting/countdown, not active
+        if gm['status'] == 'active':
+            return jsonify({'error': 'Cannot rejoin a game already in progress'}), 400
+        fresh = query_db('SELECT * FROM users WHERE id=?', (user['id'],), one=True)
+        cost  = gm['bet_amount'] * (2 if dual_card else 1)
+        try:
+            is_owner_play = (int(fresh['tg_id']) == OWNER_TG_ID)
+        except (ValueError, TypeError):
+            is_owner_play = False
+        if not is_owner_play and fresh['balance'] < cost:
+            return jsonify({'error': 'Insufficient balance'}), 400
+        new_card  = generate_bingo_card(picked or random.randint(1, 100))
+        new_card2 = generate_bingo_card(picked2 or random.randint(1000, 9999)) if dual_card else None
+        with _db_lock:
+            if not is_owner_play:
+                execute_db('UPDATE users SET balance=balance-?, total_bet=total_bet+? WHERE id=?',
+                           (cost, cost, user['id']))
+            execute_db(
+                'UPDATE bingo_players SET kicked=0, card=?, card2=?, '
+                'picked_number=?, picked_number2=?, marked_cells=?, marked2=?, bet_paid=? WHERE id=?',
+                (json.dumps(new_card), json.dumps(new_card2) if new_card2 else None,
+                 picked, picked2 if dual_card else None,
+                 '[[2,2]]', '[[2,2]]', 2 if dual_card else 1, existing['id'])
+            )
+        return jsonify({
+            'status':       'rejoined',
+            'card':         new_card,
+            'card2':        new_card2,
+            'marked_cells': [[2, 2]],
+            'marked2':      [[2, 2]],
+        })
     if picked:
         taken = query_db(
             'SELECT id FROM bingo_players WHERE game_id=? AND (picked_number=? OR picked_number2=?)',
@@ -1052,8 +1103,15 @@ def leave_game(gid):
             execute_db('UPDATE users SET balance=balance+? WHERE id=?', (cost, user['id']))
             remaining_all = query_db('SELECT id FROM bingo_players WHERE game_id=? AND kicked=0', (gid,))
             if not remaining_all:
+                # Last player left — close the room
                 execute_db("UPDATE bingo_games SET status='finished', finished_at=? WHERE id=?",
                            (time.time(), gid))
+            elif status == 'countdown' and len(remaining_all) == 1:
+                # Only one player left during countdown — reset to waiting
+                execute_db(
+                    "UPDATE bingo_games SET status='waiting', countdown_started_at=NULL WHERE id=?",
+                    (gid,)
+                )
             return jsonify({'ok': True, 'refunded': True})
         # Active forfeit — record as 'left' (not a loss)
         execute_db('UPDATE users SET games_played=games_played+1 WHERE id=?', (user['id'],))
@@ -1077,8 +1135,10 @@ def leave_game(gid):
                 ("INSERT INTO game_history (user_id,game_id,bet_amount,prize_won,won,result) VALUES (?,?,?,?,1,'win')",
                  (sole['user_id'], gid, gm['bet_amount'], prize2)),
             ])
-            _notify_queue.put({'tg_id': sole['user_id'], 'event': '_last_standing', 'data': {'prize': prize2}})
-            return jsonify({'ok': True, 'forfeited': cost})  # forfeiter sees forfeit screen; remaining player detects win via poll
+            sole_user = query_db('SELECT tg_id FROM users WHERE id=?', (sole['user_id'],), one=True)
+            if sole_user:
+                _notify_queue.put({'tg_id': int(sole_user['tg_id']), 'event': '_last_standing', 'data': {'prize': prize2}})
+            return jsonify({'ok': True, 'forfeited': cost, 'last_standing': True})
         # Notify remaining players that someone forfeited
         for p in remaining:
             urow = query_db('SELECT tg_id FROM users WHERE id=?', (p['user_id'],), one=True)
@@ -1159,7 +1219,10 @@ def claim_bingo(gid):
         else:
             card   = json.loads(prow['card'])
             marked = json.loads(prow['marked_cells'])
-        valid = check_bingo(card, marked, called_ints)
+        # Admins bypass BINGO validation (testing only — remove before production)
+        is_admin_player = bool(user.get('is_admin') or user.get('is_owner') or
+                               str(user.get('tg_id','')) in ADMIN_TG_IDS)
+        valid = True if is_admin_player else check_bingo(card, marked, called_ints)
         if not valid:
             # False claim → kick and forfeit their bet (already deducted at join)
             execute_db(
@@ -1189,8 +1252,10 @@ def claim_bingo(gid):
                     ("INSERT INTO game_history (user_id,game_id,bet_amount,prize_won,won,result) VALUES (?,?,?,?,1,'win')",
                      (sole['user_id'], gid, gm['bet_amount'], prize2)),
                 ])
-                _notify_queue.put({'tg_id': sole['user_id'], 'event': '_last_standing',
-                                   'data': {'prize': prize2}})
+                sole_tg = query_db('SELECT tg_id FROM users WHERE id=?', (sole['user_id'],), one=True)
+                if sole_tg:
+                    _notify_queue.put({'tg_id': int(sole_tg['tg_id']), 'event': '_last_standing',
+                                       'data': {'prize': prize2}})
             return jsonify({'kicked': True, 'error': 'Wrong BINGO — you have been removed from the game!'}), 200
         # Pot = sum of all actual payments (dual-card pays 2x)
         total_units = _calc_pot(gid)
@@ -1226,6 +1291,17 @@ def get_history():
     rows = query_db(
         'SELECT * FROM game_history WHERE user_id=? ORDER BY played_at DESC LIMIT 15',
         (user['id'],)
+    )
+    return jsonify(rows)
+
+@app.route('/api/transactions', methods=['GET'])
+def get_transactions():
+    user, _, err = require_auth()
+    if err: return err
+    rows = query_db(
+        'SELECT type, amount, ref, note, created_at FROM transactions '
+        'WHERE tg_id=? ORDER BY created_at DESC LIMIT 30',
+        (user['tg_id'],)
     )
     return jsonify(rows)
 
@@ -1280,6 +1356,9 @@ def deposit_complete():
 def admin_stats():
     user, err = require_admin()
     if err: return err
+    _tp = query_db('SELECT COALESCE(SUM(prize_won),0) AS s FROM game_history', one=True)
+    _tb = query_db('SELECT COALESCE(SUM(bet_amount),0) AS s FROM game_history', one=True)
+    house_cut_etb = int((_tb or {}).get('s', 0) * HOUSE_CUT)
     stats = {
         'total_users':    query_db('SELECT COUNT(*) AS c FROM users', one=True)['c'],
         'total_games':    query_db('SELECT COUNT(*) AS c FROM bingo_games', one=True)['c'],
@@ -1288,8 +1367,8 @@ def admin_stats():
             one=True)['c'],
         'finished_games': query_db(
             "SELECT COUNT(*) AS c FROM bingo_games WHERE status='finished'", one=True)['c'],
-        'total_prizes':   query_db(
-            'SELECT COALESCE(SUM(prize_won),0) AS s FROM game_history', one=True)['s'],
+        'total_prizes':   (_tp or {}).get('s', 0),
+        'house_cut_etb':  house_cut_etb,
     }
     return jsonify(stats)
 
@@ -1297,7 +1376,16 @@ def admin_stats():
 def admin_users():
     user, err = require_admin()
     if err: return err
-    return jsonify(query_db('SELECT * FROM users ORDER BY created_at DESC'))
+    q = request.args.get('q', '').strip()
+    total = query_db('SELECT COUNT(*) AS c FROM users', one=True)['c']
+    if q:
+        rows = query_db(
+            "SELECT * FROM users WHERE username LIKE ? OR tg_id=? ORDER BY created_at DESC LIMIT 10",
+            (f'%{q}%', q)
+        )
+    else:
+        rows = query_db('SELECT * FROM users ORDER BY created_at DESC LIMIT 10')
+    return jsonify({'users': rows, 'total': total})
 
 @app.route('/api/admin/games', methods=['GET'])
 def admin_games():
@@ -1401,7 +1489,7 @@ def webapp_deposit_request():
     fresh = query_db('SELECT * FROM users WHERE id=?', (user['id'],), one=True)
     admin_txt = (
         f"📥 <b>Deposit Request (WebApp)</b>\n\n"
-        f"ZB Username: <b>{fresh['username']}</b>\n"
+        f"JB Username: <b>{fresh['username']}</b>\n"
         f"TG ID: <code>{user['tg_id']}</code>\n"
         f"Sender Name: {sender_name}\n"
         f"Amount: <b>{amt:,.0f} ETB</b>\nReference: <code>{ref}</code>\n"
@@ -1414,7 +1502,67 @@ def webapp_deposit_request():
         sent = _tg_notify_direct(aid, admin_txt)
         if not sent:
             _notify_queue.put({'tg_id': aid, 'event': 'custom', 'data': {'message': admin_txt}})
+    _notify_queue.put({'tg_id': int(user['tg_id']), 'event': 'custom', 'data': {'message':
+        f"⏳ <b>Deposit Request Received</b>\n\n"
+        f"Amount: <b>{amt:,.0f} ETB</b> · Ref: <code>{ref}</code>\n"
+        f"Pending admin approval. You'll be notified once confirmed. ✅"}})
     return jsonify({'status': 'submitted'})
+
+def _check_withdrawal_eligibility(user, withdrawal_amount=None):
+    """
+    Returns (ok:bool, error:str|None).
+    Rules (all use StandaloneDB for bot thread safety):
+      - Must have at least one deposit of 50+ ETB.
+      - Must have played 15+ total games (result != 'left').
+      - Must have played 5+ games today.
+      - Max 1 withdrawal request per calendar day.
+      - After withdrawal, balance must be >= 50 ETB.
+    """
+    tg_id = user['tg_id']
+    uid   = user['id']
+    balance = user['balance']
+
+    with StandaloneDB() as sdb:
+        # 1. At least one deposit of 50+ ETB
+        deposit_row = sdb.one(
+            "SELECT amount FROM transactions WHERE tg_id=? AND type='deposit' AND amount>=50 LIMIT 1",
+            (tg_id,)
+        )
+        if not deposit_row:
+            return False, "You must make at least one deposit of 50 ETB before withdrawing."
+
+        # 2. Total games (excluding left)
+        total_games = sdb.one(
+            "SELECT COUNT(*) AS c FROM game_history WHERE user_id=? AND result != 'left'",
+            (uid,)
+        )['c']
+        if total_games < 15:
+            remaining = 15 - total_games
+            return False, f"You need to play {remaining} more game(s) (total 15). You have played {total_games}."
+
+        # 3. Games today
+        today_games = sdb.one(
+            "SELECT COUNT(*) AS c FROM game_history WHERE user_id=? AND result != 'left' AND DATE(played_at) = DATE('now')",
+            (uid,)
+        )['c']
+        if today_games < 5:
+            remaining_today = 5 - today_games
+            return False, f"You need to play {remaining_today} more game(s) today. Played today: {today_games}."
+
+        # 4. Daily withdrawal limit (1 per day)
+        wd_today = sdb.one(
+            "SELECT COUNT(*) AS c FROM transactions WHERE tg_id=? AND type='withdraw_request' AND DATE(created_at) = DATE('now')",
+            (tg_id,)
+        )['c']
+        if wd_today >= 1:
+            return False, "You have already submitted a withdrawal request today. Try again tomorrow."
+
+    # 5. After withdrawal balance check
+    if withdrawal_amount is not None:
+        if balance - withdrawal_amount < 50:
+            return False, "After withdrawal, your balance must be at least 50 ETB."
+
+    return True, None
 
 @app.route('/api/withdraw-request', methods=['POST'])
 def webapp_withdraw_request():
@@ -1426,7 +1574,7 @@ def webapp_withdraw_request():
     bank         = str(body.get('bank', '')).strip()         # 'CBE' or 'Telebirr'
     account_name = str(body.get('account_name', '')).strip()
     if amt < MIN_WITHDRAW:
-        return jsonify({'error': f'Min withdrawal {MIN_WITHDRAW} ETB'}), 400
+        return jsonify({'error': f'Minimum withdrawal is {MIN_WITHDRAW} ETB'}), 400
     if not phone:
         return jsonify({'error': 'Phone/account number required'}), 400
     if not bank:
@@ -1436,9 +1584,20 @@ def webapp_withdraw_request():
     fresh = query_db('SELECT * FROM users WHERE id=?', (user['id'],), one=True)
     if fresh['balance'] < amt:
         return jsonify({'error': 'Insufficient balance'}), 400
+    # Check eligibility (including post-withdrawal balance)
+    ok_wd, err_wd = _check_withdrawal_eligibility(fresh, amt)
+    if not ok_wd:
+        return jsonify({'error': err_wd}), 400
+    # Record the withdrawal request in transactions for daily limit tracking
+    import hashlib as _hwd
+    wd_req_ref = _hwd.md5(f"wdreq:{fresh['tg_id']}:{int(amt)}:{int(time.time())//86400}".encode()).hexdigest()[:16]
+    try:
+        execute_db('INSERT INTO transactions (tg_id,type,amount,ref,note) VALUES (?,?,?,?,?)',
+                   (fresh['tg_id'], 'withdraw_request', int(amt), wd_req_ref, 'webapp'))
+    except Exception: pass  # duplicate ref in same day — blocked above anyway
     admin_txt = (
         f"💸 <b>Withdrawal Request (WebApp)</b>\n\n"
-        f"ZB Username: <b>{fresh['username']}</b>\n"
+        f"JB Username: <b>{fresh['username']}</b>\n"
         f"TG ID: <code>{user['tg_id']}</code>\n"
         f"Amount: <b>{amt:,.0f} ETB</b>\n"
         f"Method: <b>{bank}</b>\n"
@@ -1452,7 +1611,33 @@ def webapp_withdraw_request():
         sent = _tg_notify_direct(aid, admin_txt)
         if not sent:
             _notify_queue.put({'tg_id': aid, 'event': 'custom', 'data': {'message': admin_txt}})
+    _notify_queue.put({'tg_id': int(user['tg_id']), 'event': 'custom', 'data': {'message':
+        f"⏳ <b>Withdrawal Request Received</b>\n\n"
+        f"Amount: <b>{amt:,.0f} ETB</b> via {bank}\n"
+        f"Account: {phone} ({account_name})\n"
+        f"Pending processing. You'll be notified once sent. ✅"}})
     return jsonify({'status': 'submitted'})
+
+@app.route('/api/games-today', methods=['GET'])
+def games_today():
+    user, _, err = require_auth()
+    if err: return err
+    with StandaloneDB() as sdb:
+        count = sdb.one(
+            "SELECT COUNT(*) AS c FROM game_history WHERE user_id=? AND result != 'left' AND DATE(played_at) = DATE('now')",
+            (user['id'],)
+        )['c']
+    return jsonify({'count': count})
+
+@app.route('/api/record-withdrawal-date', methods=['POST'])
+def record_withdrawal_date():
+    user, _, err = require_auth()
+    if err: return err
+    execute_db(
+        'UPDATE users SET last_withdrawal_date=? WHERE id=?',
+        (datetime.utcnow().date().isoformat(), user['id'])
+    )
+    return jsonify({'ok': True})
 
 @app.route('/health')
 def health():
@@ -1578,7 +1763,7 @@ def kb_phone() -> ReplyKeyboardMarkup:
         resize_keyboard=True, one_time_keyboard=True,
     )
 
-def kb_webapp(label: str = '🎱 Open Zebi Bingo', bet: int | None = None) -> InlineKeyboardMarkup:
+def kb_webapp(label: str = '🎱 Open Joker Bingo', bet: int | None = None) -> InlineKeyboardMarkup:
     port = int(os.environ.get('PORT', 5000))
     base = os.environ.get('WEBAPP_URL', f'http://localhost:{port}').rstrip('/')
     url  = f'{base}/?bet={bet}' if bet else f'{base}/'
@@ -1600,14 +1785,17 @@ def kb_bets(balance: int) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 # ── Router ────────────────────────────────────────────────────────────────────
-bot_router = Router(name='zebi_bingo')
+bot_router = Router(name='joker_bingo')
 
 def admin_guard(handler):
+    import inspect as _inspect
     async def _w(message: Message, *a, **kw):
         if message.from_user.id not in ADMIN_TG_IDS_INT:
             await message.answer('⛔ Admin access required.')
             return
-        return await handler(message, *a, **kw)
+        sig      = _inspect.signature(handler)
+        accepted = {k: v for k, v in kw.items() if k in sig.parameters}
+        return await handler(message, *a, **accepted)
     _w.__name__ = handler.__name__
     return _w
 
@@ -1649,7 +1837,7 @@ async def cmd_start(message: Message, state: FSMContext, session: aiohttp.Client
         await state.set_state(Registration.waiting_for_username)
         await state.update_data(tg_id=str(tg.id))
         new_text = (
-            '🎱 <b>Welcome to Zebi Bingo!</b>\n\n'
+            '🎱 <b>Welcome to Joker Bingo!</b>\n\n'
             'Pick numbers · Mark your card · Shout <b>BINGO!</b>\n'
             'Win up to <b>90% of the pot</b> every round 💰\n\n'
             f'Choose a username (2–20 chars, no spaces):\n'
@@ -1729,7 +1917,7 @@ async def cmd_cancel(message: Message, state: FSMContext):
 async def cmd_help(message: Message, state: FSMContext):
     await state.clear()
     await message.answer(
-        '🎱 <b>Zebi Bingo — How to Play</b>\n\n'
+        '🎱 <b>Joker Bingo — How to Play</b>\n\n'
         '1. Tap 🎮 Play Bingo → choose bet (10/20/50/100 ETB)\n'
         '2. Open the game and pick your lucky number\n'
         '3. Optionally choose a 2nd card (double bet, double chance!)\n'
@@ -1910,7 +2098,7 @@ async def deposit_amount(message: Message, state: FSMContext):
     await message.answer(
         f"✅ Amount: <b>{amt:,.0f} ETB</b>\n\n"
         f"📤 <b>Send payment to:</b>\n{PAYMENT_ACCOUNTS}\n\n"
-        f"📌 <b>Reference:</b> <code>ZB-{message.from_user.id}</code>\n"
+        f"📌 <b>Reference:</b> <code>JB-{message.from_user.id}</code>\n"
         "<i>Include this reference when sending!</i>\n\n"
         "Reply with your <b>transaction reference / SMS code</b>:",
         reply_markup=kb_cancel(),
@@ -1928,7 +2116,7 @@ async def deposit_ref(message: Message, state: FSMContext):
     await state.clear()
     admin_txt = (
         f"📥 <b>Deposit Request</b>\n\n"
-        f"ZB Username: <b>{bb_username}</b>\n"
+        f"JB Username: <b>{bb_username}</b>\n"
         f"TG: <code>{message.from_user.id}</code> (@{message.from_user.username or '—'})\n"
         f"Amount: <b>{amt:,.0f} ETB</b>\nReference: <code>{ref}</code>\n"
         f"Time: {datetime.utcnow().strftime('%Y-%m-%d %H:%M')} UTC\n\n"
@@ -1949,11 +2137,12 @@ async def cmd_withdraw(message: Message, state: FSMContext, session: aiohttp.Cli
         u = await bot_api('GET', '/api/user', tg_id=message.from_user.id, session=session)
     except Exception as exc:
         await message.answer(f'⚠️ {exc}'); return
+    # Check eligibility before even starting FSM
+    ok_wd, err_wd = _check_withdrawal_eligibility(u, None)
+    if not ok_wd:
+        await message.answer(err_wd, reply_markup=kb_main()); return
     if u['balance'] < MIN_WITHDRAW:
-        await message.answer(f"⚠️ Min withdrawal: <b>{MIN_WITHDRAW} ETB</b>.\n"
-                             f"Your balance: <b>{u['balance']:,} ETB</b>"); return
-    if u['games_played'] < 1:
-        await message.answer('⚠️ Play at least one game before withdrawing.'); return
+        await message.answer(f"⚠️ Min withdrawal: {MIN_WITHDRAW} ETB.\nYour balance: {u['balance']:,} ETB", reply_markup=kb_main()); return
     await state.update_data(bb_username=u.get('username', '—'))
     await state.set_state(Withdrawal.waiting_for_amount)
     await message.answer(
@@ -1976,9 +2165,13 @@ async def withdraw_amount(message: Message, state: FSMContext, session: aiohttp.
     except Exception as exc:
         await message.answer(f'⚠️ {exc}'); return
     if amt < MIN_WITHDRAW:
-        await message.answer(f'⚠️ Minimum: {MIN_WITHDRAW} ETB.'); return
+        await message.answer(f'⚠️ Minimum withdrawal is {MIN_WITHDRAW} ETB.'); return
     if amt > u['balance']:
-        await message.answer(f"⚠️ Insufficient. Available: {u['balance']:,} ETB."); return
+        await message.answer(f"⚠️ Insufficient balance. Available: {u['balance']:,} ETB."); return
+    # Final eligibility check including post-withdrawal balance
+    ok_wd, err_wd = _check_withdrawal_eligibility(u, amt)
+    if not ok_wd:
+        await message.answer(err_wd, reply_markup=kb_main()); return
     await state.update_data(withdraw_amount=amt)
     await state.set_state(Withdrawal.waiting_for_bank)
     await message.answer(
@@ -2034,7 +2227,7 @@ async def withdraw_account_name(message: Message, state: FSMContext):
     await state.clear()
     admin_txt = (
         f"💸 <b>Withdrawal Request</b>\n\n"
-        f"ZB Username: <b>{bb_username}</b>\n"
+        f"JB Username: <b>{bb_username}</b>\n"
         f"TG: <code>{message.from_user.id}</code> (@{message.from_user.username or '—'})\n"
         f"Amount: <b>{amt:,.0f} ETB</b>\n"
         f"Method: <b>{bank}</b>\n"
@@ -2042,14 +2235,22 @@ async def withdraw_account_name(message: Message, state: FSMContext):
         f"Time: {datetime.utcnow().strftime('%Y-%m-%d %H:%M')} UTC\n\n"
         f"✅ Approve: <code>/adminwithdraw {message.from_user.id} {amt:.0f}</code>"
     )
+    # Record the request for daily limit tracking
+    import hashlib as _hbotwd
+    wd_ref = _hbotwd.md5(f"wdreq:{message.from_user.id}:{int(amt)}:{int(time.time())//86400}".encode()).hexdigest()[:16]
+    with StandaloneDB() as sdb:
+        try:
+            sdb.run('INSERT INTO transactions (tg_id,type,amount,ref,note) VALUES (?,?,?,?,?)',
+                    (str(message.from_user.id), 'withdraw_request', int(amt), wd_ref, 'bot'))
+        except Exception: pass
     for aid in ADMIN_TG_IDS_INT:
         sent = _tg_notify_direct(aid, admin_txt)
         if not sent:
             _notify_queue.put({'tg_id': aid, 'event': 'custom', 'data': {'message': admin_txt}})
     await message.answer(
-        f"✅ <b>Withdrawal request received!</b>\n\nAmount: <b>{amt:,.0f} ETB</b>\n"
+        f"⏳ <b>Withdrawal request received!</b>\n\nAmount: <b>{amt:,.0f} ETB</b>\n"
         f"Method: <b>{bank}</b> · {phone}\n"
-        "Processed within <b>~1 hour</b>. 🔔",
+        "You'll be notified once your request is approved. Please wait. 🔔",
         reply_markup=kb_main(),
     )
 
@@ -2101,7 +2302,7 @@ async def cmd_invite(message: Message, session: aiohttp.ClientSession):
         f'👥 Friends joined: <b>{rc}</b>\n'
         f'🎁 Next bonus at: <b>{nxt} referrals</b> (+{REFERRAL_BONUS} ETB)\n\n'
         f'<b>Recent friends:</b>\n{recent}\n\n'
-        f'Share your link → friends register → you earn <b>{REFERRAL_BONUS} ETB</b> every {REFERRALS_PER_BONUS} signups!\n\n'        '🎁 <b>New players get 10% bonus on first deposit!</b>\n\n'        '🇪🇹 <i>በ 10 ብር ቦነስ ጀምሩ! 1ኛ ዲፖዚት 10% ቦነስ! ጓደኛ ሲጋብዙ ሌላ ቦነስ! ይጫወቱ! ያሸንፉ!</i>',
+        f'Share your link → friends register → you earn <b>{REFERRAL_BONUS} ETB</b> every {REFERRALS_PER_BONUS} signups!\n\n'        '🎁 <b>New players get 10% bonus on first deposit!</b>\n\n'        '🇪🇹 <i>በ 10 ብር ቦነስ ጀምሩ! ለመጀመሪያ ዲፖዚት 10% ቦነስ! ጓደኛ ሲጋብዙ ሌላ ቦነስ! የጋበዙት ጓደኛ ዲፖዚት ሲያደርግ ለናንተ ቦነስ! ይጫወቱ! ያሸንፉ!</i>',
         reply_markup=kb_main(),
     )
 
@@ -2151,8 +2352,7 @@ async def cmd_adep(message: Message, session: aiohttp.ClientSession):
                              'Tip: /admindeposit &lt;tg_id&gt; to look up username first'); return
     tid, amt = int(parts[1]), float(parts[2])
     try:
-        users  = await bot_api('GET', '/api/admin/users', tg_id=message.from_user.id, session=session)
-        target = next((u for u in users if u['tg_id'] == str(tid)), None)
+        target = query_db('SELECT * FROM users WHERE tg_id=?', (str(tid),), one=True)
         if not target: await message.answer('⚠️ User not found.'); return
         # Idempotency: build a ref from admin_tg + user_tg + amount + minute-bucket
         import hashlib as _hl
@@ -2201,8 +2401,7 @@ async def cmd_awdraw(message: Message, session: aiohttp.ClientSession):
                              'Tip: /adminwithdraw &lt;tg_id&gt; to look up username first'); return
     tid, amt = int(parts[1]), float(parts[2])
     try:
-        users  = await bot_api('GET', '/api/admin/users', tg_id=message.from_user.id, session=session)
-        target = next((u for u in users if u['tg_id'] == str(tid)), None)
+        target = query_db('SELECT * FROM users WHERE tg_id=?', (str(tid),), one=True)
         if not target: await message.answer('⚠️ User not found.'); return
         res = await bot_api('POST', '/api/admin/funds', tg_id=message.from_user.id,
                             body={'username': target['username'], 'amount': -int(amt)}, session=session)
@@ -2253,7 +2452,7 @@ async def cmd_aban(message: Message, session: aiohttp.ClientSession):
 @bot_router.message(Command('adminunban'))
 @admin_guard
 async def cmd_aunban(message: Message, session: aiohttp.ClientSession):
-    parts = message.text.split(maxsplit=1)
+    parts = message.text.split(maxskip=1)
     if len(parts) < 2 or not parts[1].strip().isdigit():
         await message.answer('Usage: /adminunban &lt;tg_id&gt;'); return
     tgid = parts[1].strip()
@@ -2290,15 +2489,15 @@ async def cmd_amsg(message: Message):
 @admin_guard
 async def cmd_abcast(message: Message, session: aiohttp.ClientSession):
     parts = message.text.split(maxsplit=1)
-    if len(parts) < 2: await message.answer('Usage: /adminbroadcast &lt;text&gt;'); return
-    try:
-        users = await bot_api('GET', '/api/admin/users', tg_id=message.from_user.id, session=session)
-    except Exception as exc:
-        await message.answer(f'⚠️ {exc}'); return
-    for u in users:
+    if len(parts) < 2:
+        await message.answer('Usage: /adminbroadcast &lt;text&gt;'); return
+    # Use StandaloneDB to avoid app context issues
+    with StandaloneDB() as sdb:
+        all_users = sdb.query('SELECT tg_id FROM users WHERE is_banned=0 ORDER BY id')
+    for u in all_users:
         _notify_queue.put({'tg_id': int(u['tg_id']), 'event': 'custom',
                            'data': {'message': f"📣 <b>Announcement</b>\n\n{parts[1]}"}})
-    await message.answer(f"📣 Broadcast queued for {len(users)} users.")
+    await message.answer(f"📣 Broadcast queued for {len(all_users)} users.")
 
 # ── Notification drain task ───────────────────────────────────────────────────
 async def _drain_notify_queue(bot: Bot):
@@ -2349,23 +2548,17 @@ async def _bot_main():
     bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp  = Dispatcher(storage=MemoryStorage())
 
-    # Inject aiohttp session into every handler via middleware
     dp.update.middleware(_session_middleware)
     dp.include_router(bot_router)
 
-    # Cache bot username
     me = await bot.get_me()
     _bot_username = me.username
     logger.info(f'[Bot] @{_bot_username} started (polling)')
 
-    # Delete any stale webhook so polling works
+    # Delete any stale webhook before polling
     await bot.delete_webhook(drop_pending_updates=True)
+    await asyncio.sleep(2)
 
-    # Brief pause so any previous instance (from a rolling redeploy) has time
-    # to release its getUpdates session before we start polling.
-    await asyncio.sleep(3)
-
-    # Start notification drain as background task
     asyncio.create_task(_drain_notify_queue(bot))
 
     try:
@@ -2373,7 +2566,7 @@ async def _bot_main():
             bot,
             allowed_updates=dp.resolve_used_update_types(),
             close_bot_session=True,
-            handle_signals=False,   # ← required when running in a non-main thread
+            handle_signals=False,
         )
     finally:
         await bot.session.close()
@@ -2439,5 +2632,5 @@ threading.Thread(target=_deferred_startup, daemon=True, name='Startup').start()
 # ══════════════════════════════════════════════════════════════════════════════
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    print(f'[Zebi Bingo] http://0.0.0.0:{port}  DB={DB_TYPE}')
+    print(f'[Joker Bingo] http://0.0.0.0:{port}  DB={DB_TYPE}')
     app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False)
