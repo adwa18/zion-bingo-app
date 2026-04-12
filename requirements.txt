@@ -1,0 +1,18 @@
+# Benz Bingo — Python dependencies
+# Install: pip install -r requirements.txt
+
+# ── Web framework ─────────────────────────────────────────────────────────────
+flask>=3.0.0
+flask-cors>=4.0.0
+gunicorn>=21.0.0          # Production WSGI server (Render/Railway/etc)
+
+# ── Database ──────────────────────────────────────────────────────────────────
+psycopg2-binary>=2.9.9    # PostgreSQL driver (used in production on Render)
+                           # psycopg2-binary includes compiled C libs — no build deps needed
+
+# ── Bot ──────────────────────────────────────────────────────────────────────
+aiogram>=3.7.0             # Async Telegram Bot framework
+aiohttp>=3.9.0             # Async HTTP client/server
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+python-dotenv>=1.0.0       # Load .env in local development

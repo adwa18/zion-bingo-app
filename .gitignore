@@ -1,0 +1,7 @@
+.env
+bingo.db
+*.sqlite
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
