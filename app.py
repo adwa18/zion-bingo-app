@@ -535,9 +535,17 @@ def get_tg_user_from_request():
     dev_hdr = request.headers.get('X-Tg-User', '')
     if dev_hdr:
         try:
-            return json.loads(dev_hdr)
-        except Exception:
-            pass
+           
+            # Try base64 decode first (for bot calls)
+            import base64
+            decoded = base64.b64decode(dev_hdr).decode()
+            return json.loads(decoded)
+        except Exception: 
+            try:
+          
+                return json.loads(dev_hdr)
+            except Exception:
+                pass
     return None
 
 def get_current_user():
@@ -1284,6 +1292,23 @@ def claim_bingo(gid):
         fresh = query_db('SELECT * FROM users WHERE id=?', (user['id'],), one=True)
     return jsonify({'winner': True, 'prize': prize, 'user': fresh})
 
+# ---------- Share win to Telegram ----------
+TELEGRAM_CHANNEL_ID = os.environ.get('TELEGRAM_CHANNEL_ID', '')
+
+@app.route('/api/share-win', methods=['POST'])
+def share_win():
+    user, _, err = require_auth()
+    if err: return err
+    data = request.json
+    prize = data.get('prize', 0)
+    game_id = data.get('game_id', '')
+    if TELEGRAM_CHANNEL_ID:
+        message = f"🏆 JACKPOT! {user['username']} won {prize:,} ETB in game {game_id}! 🎉"
+        _tg_notify_direct(int(TELEGRAM_CHANNEL_ID), message)
+    return jsonify({'ok': True})
+
+
+
 @app.route('/api/history', methods=['GET'])
 def get_history():
     user, _, err = require_auth()
@@ -1711,7 +1736,9 @@ async def bot_api(method: str, path: str, tg_id: int | None = None,
     base    = f'http://127.0.0.1:{port}'
     headers = {'Content-Type': 'application/json'}
     if tg_id:
-        headers['X-Tg-User'] = json.dumps({'id': tg_id})
+        import base64
+        user_json = json.dumps({'id': tg_id})
+        headers['X-Tg-User'] = base64.b64encode(user_json.encode()).decode()
 
     own_session = session is None
     if own_session:
@@ -2352,23 +2379,30 @@ async def cmd_adep(message: Message, session: aiohttp.ClientSession):
                              'Tip: /admindeposit &lt;tg_id&gt; to look up username first'); return
     tid, amt = int(parts[1]), float(parts[2])
     try:
-        target = query_db('SELECT * FROM users WHERE tg_id=?', (str(tid),), one=True)
-        if not target: await message.answer('⚠️ User not found.'); return
+        # Use StandaloneDB to fetch user (no app context)
+        with StandaloneDB() as sdb:
+            target = sdb.one('SELECT * FROM users WHERE tg_id=?', (str(tid),))
+        if not target:
+            await message.answer('⚠️ User not found.')
+            return
         # Idempotency: build a ref from admin_tg + user_tg + amount + minute-bucket
         import hashlib as _hl
         ref_raw = f"dep:{tid}:{int(amt)}:{int(time.time())//300}"
         tx_ref  = _hl.md5(ref_raw.encode()).hexdigest()[:16]
-        # Check if this deposit was already processed (StandaloneDB — no Flask context)
+        # Check if this deposit was already processed (StandaloneDB)
         with StandaloneDB() as sdb:
             existing_tx = sdb.one('SELECT id FROM transactions WHERE ref=?', (tx_ref,))
         if existing_tx:
-            await message.answer('⚠️ This deposit appears to have already been processed (duplicate).'); return
+            await message.answer('⚠️ This deposit appears to have already been processed (duplicate).')
+            return
+        # Perform the fund adjustment via API (safe)
         res = await bot_api('POST', '/api/admin/funds', tg_id=message.from_user.id,
                             body={'username': target['username'], 'amount': int(amt)}, session=session)
-        # Record transaction (StandaloneDB — no Flask context in bot thread)
+        # Record transaction (StandaloneDB)
         with StandaloneDB() as sdb:
             sdb.run('INSERT INTO transactions (tg_id, type, amount, ref, note) VALUES (?,?,?,?,?)',
                     (str(tid), 'deposit', int(amt), tx_ref, f'admin:{message.from_user.id}'))
+        # Apply first-deposit bonus (API call)
         bonus_res = await bot_api('POST', '/api/deposit-complete', tg_id=message.from_user.id,
                                   body={'tg_id': str(tid), 'amount': int(amt)}, session=session)
         bonus     = bonus_res.get('bonus', 0)
@@ -2401,18 +2435,24 @@ async def cmd_awdraw(message: Message, session: aiohttp.ClientSession):
                              'Tip: /adminwithdraw &lt;tg_id&gt; to look up username first'); return
     tid, amt = int(parts[1]), float(parts[2])
     try:
-        target = query_db('SELECT * FROM users WHERE tg_id=?', (str(tid),), one=True)
-        if not target: await message.answer('⚠️ User not found.'); return
+        # Use StandaloneDB
+        with StandaloneDB() as sdb:
+            target = sdb.one('SELECT * FROM users WHERE tg_id=?', (str(tid),))
+        if not target:
+            await message.answer('⚠️ User not found.')
+            return
+        # Perform withdrawal via API
         res = await bot_api('POST', '/api/admin/funds', tg_id=message.from_user.id,
                             body={'username': target['username'], 'amount': -int(amt)}, session=session)
-        # Record in transactions table (StandaloneDB — no Flask context in bot thread)
+        # Record in transactions table (StandaloneDB)
         import hashlib as _hl2
         wr_ref = _hl2.md5(f"wd:{tid}:{int(amt)}:{int(time.time())//300}".encode()).hexdigest()[:16]
         with StandaloneDB() as sdb:
             try:
                 sdb.run('INSERT INTO transactions (tg_id,type,amount,ref,note) VALUES (?,?,?,?,?)',
                         (str(tid), 'withdraw', int(amt), wr_ref, f'admin:{message.from_user.id}'))
-            except Exception: pass  # ignore duplicate
+            except Exception:
+                pass  # ignore duplicate
         await message.answer(f"✅ Withdrawal {amt:,.0f} ETB confirmed for <b>{target['username']}</b>.\nBalance: {res['new_balance']:,} ETB")
         _notify_queue.put({'tg_id': tid, 'event': 'withdraw_approved',
                           'data': {'amount': int(amt), 'new_balance': res['new_balance']}})
