@@ -1299,13 +1299,16 @@ TELEGRAM_CHANNEL_ID = os.environ.get('TELEGRAM_CHANNEL_ID', '')
 def share_win():
     user, _, err = require_auth()
     if err: return err
-    data = request.json
+    data = request.json or {}
     prize = data.get('prize', 0)
     game_id = data.get('game_id', '')
     if TELEGRAM_CHANNEL_ID:
-        chan_id = int(TELEGRAM_CHANNEL_ID)
-        message = f"🏆 BINGO! <b>{user['username']}</b> just won <b>{prize:,} ETB</b> in game {game_id}! 🎉"
-        _tg_notify_direct(chan_id, message)
+        try:
+            chan_id = int(TELEGRAM_CHANNEL_ID)
+            msg = (f"🏆 BINGO! <b>{user['username']}</b> just won <b>{prize:,} ETB</b> in game {game_id}! 🎉")
+            _tg_notify_direct(chan_id, msg)
+        except Exception:
+            pass
     return jsonify({'ok': True})
 
 
@@ -1453,6 +1456,15 @@ def admin_funds():
         _notify_queue.put({'tg_id': int(target['tg_id']), 'event': event,
                            'data': {'amount': amt_abs, 'new_balance': new_bal}})
     return jsonify({'success': True, 'username': username, 'new_balance': new_bal})
+    # Share approval to channel
+    if TELEGRAM_CHANNEL_ID and tx_type == 'withdraw':
+        try:
+            chan_id = int(TELEGRAM_CHANNEL_ID)
+            chan_msg = (f"💸 <b>{target['username']}</b> withdrew "
+                        f"<b>{amt_abs:,} ETB</b> from Joker Bingo.")
+            _tg_notify_direct(chan_id, chan_msg)
+        except Exception:
+            pass
 
 @app.route('/api/admin/games/<gid>/finish', methods=['POST'])
 def admin_force_finish(gid):
@@ -1567,17 +1579,20 @@ def _check_withdrawal_eligibility(user, withdrawal_amount=None):
             return False, f"You need to play {remaining} more game(s) (total 15). You have played {total_games}."
 
         # 3. Games today
+        today_clause = "AND DATE(played_at) = CURRENT_DATE" if DB_TYPE == 'postgres' else "AND DATE(played_at) = DATE('now')"
         today_games = sdb.one(
-            "SELECT COUNT(*) AS c FROM game_history WHERE user_id=? AND result != 'left' AND DATE(played_at) = DATE('now')",
+            f"SELECT COUNT(*) AS c FROM game_history WHERE user_id=? AND result != 'left' {today_clause}",
             (uid,)
         )['c']
+        
         if today_games < 5:
             remaining_today = 5 - today_games
             return False, f"You need to play {remaining_today} more game(s) today. Played today: {today_games}."
 
         # 4. Daily withdrawal limit (1 per day)
+        date_clause = "AND DATE(created_at) = CURRENT_DATE" if DB_TYPE == 'postgres' else "AND DATE(created_at) = DATE('now')"
         wd_today = sdb.one(
-            "SELECT COUNT(*) AS c FROM transactions WHERE tg_id=? AND type='withdraw_request' AND DATE(created_at) = DATE('now')",
+            f"SELECT COUNT(*) AS c FROM transactions WHERE tg_id=? AND type='withdraw_request' {date_clause}",
             (tg_id,)
         )['c']
         if wd_today >= 1:
