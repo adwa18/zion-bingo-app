@@ -1303,8 +1303,9 @@ def share_win():
     prize = data.get('prize', 0)
     game_id = data.get('game_id', '')
     if TELEGRAM_CHANNEL_ID:
-        message = f"🏆 JACKPOT! {user['username']} won {prize:,} ETB in game {game_id}! 🎉"
-        _tg_notify_direct(int(TELEGRAM_CHANNEL_ID), message)
+        chan_id = int(TELEGRAM_CHANNEL_ID)
+        message = f"🏆 BINGO! <b>{user['username']}</b> just won <b>{prize:,} ETB</b> in game {game_id}! 🎉"
+        _tg_notify_direct(chan_id, message)
     return jsonify({'ok': True})
 
 
