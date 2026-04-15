@@ -652,7 +652,7 @@ body::before {
 }
 
 /* ══════════════════════════════════════════════════════════
-   SCREEN 7 — RESULT (updated: same buttons for win/loss)
+   SCREEN 7 — RESULT (updated: same options for win/loss)
 ══════════════════════════════════════════════════════════ */
 .result-hero { text-align:center; padding:24px 0; }
 .result-icon  { font-size:64px; margin-bottom:12px; }
@@ -769,7 +769,7 @@ body::before {
 }
 .section-title::after { content:''; flex:1; height:1px; background:var(--border); }
 
-/* Add new styles for error boxes, spinners, progress bar, etc. */
+/* ── NEW STYLES FOR IMPROVEMENTS ────────────────────────── */
 .error-box {
   background: rgba(245,78,78,0.15);
   border: 1px solid var(--red);
@@ -803,30 +803,12 @@ body::before {
   background: var(--gold);
   transition: width 0.3s;
 }
-.lang-selector {
-  display: flex;
-  gap: 8px;
-  margin-top: 10px;
-}
-.lang-btn {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 4px 12px;
-  font-size: 12px;
-  cursor: pointer;
-}
-.lang-btn.active {
-  background: var(--gold);
-  color: #000;
-  border-color: var(--gold);
-}
 .sound-toggle {
   cursor: pointer;
   font-size: 20px;
   padding: 4px 8px;
+  display: inline-block;
 }
-   
 </style>
 </head>
 <body>
@@ -991,7 +973,7 @@ body::before {
           <div class="card-title" style="margin:0" id="preview-title">🃏 Your BINGO Card</div>
           <span style="font-size:10px;color:var(--text3)"><span style="color:var(--blue)">Blue</span>=lucky · <span style="color:var(--gold)">Gold</span>=FREE</span>
         </div>
-        <!-- Single or dual preview -->
+        <!-- Single preview -->
         <div id="preview-cards-wrap" style="display:flex;gap:8px;align-items:flex-start">
           <div style="flex:1;min-width:0">
             <div class="bingo-card-grid" id="preview-card-grid"></div>
@@ -1060,7 +1042,7 @@ body::before {
       </div>
     </div>
 
-    <!-- ── RESULT (updated: same options for win/loss) ── -->
+    <!-- ── RESULT (same options for win/loss) ── -->
     <div class="screen" id="screen-result">
       <div id="result-inner"></div>
       <div id="result-actions" style="padding:0 4px">
@@ -1089,17 +1071,18 @@ body::before {
       </div>
     </div>
 
-    <!-- ── DEPOSIT ── -->
+    <!-- ── DEPOSIT (with error box) ── -->
     <div class="screen" id="screen-deposit">
       <div class="card card-gold fade-in">
         <div class="card-title">💰 Deposit Funds</div>
-        <!-- Payment info box (updated to match backend) -->
+        <!-- Payment info box -->
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:2">
           📱 <b>Send payment to:</b><br>
           CBE: <span id="dep-cbe" style="font-family:monospace;color:var(--gold);cursor:pointer;font-weight:700" onclick="copyText('1000532982565','CBE number')">1000532982565</span> (Tewodros Ephrem) <span style="font-size:10px;color:var(--text3)" onclick="copyText('1000532982565','CBE number')">📋</span><br>
           Telebirr: <span id="dep-tel" style="font-family:monospace;color:var(--gold);cursor:pointer;font-weight:700" onclick="copyText('0913252238','Telebirr number')">0913252238</span> (Tewodros Ephrem) <span style="font-size:10px;color:var(--text3)" onclick="copyText('0913252238','Telebirr number')">📋</span><br>
           Reference: <span id="dep-ref-code" style="font-family:monospace;color:var(--green);font-weight:700;cursor:pointer" onclick="copyText(document.getElementById('dep-ref-code').textContent,'Reference')">JB-…</span> <span style="font-size:10px;color:var(--text3)" onclick="copyText(document.getElementById('dep-ref-code').textContent,'Reference')">📋</span>
         </div>
+        <div id="dep-error" class="error-box"></div>
         <label class="label">Your Name (as sent on payment) <span style="color:var(--red)">*</span></label>
         <input class="input" id="dep-sender-name" type="text" placeholder="e.g. Abebe Kebede" required>
         <label class="label" style="margin-top:8px">Amount (ETB) <span style="color:var(--red)">*</span></label>
@@ -1111,19 +1094,21 @@ body::before {
       </div>
     </div>
 
-    <!-- ── WITHDRAW (updated rules, min 200, no frontend daily check) ── -->
+    <!-- ── WITHDRAW (with error box and rules) ── -->
     <div class="screen" id="screen-withdraw">
       <div class="card card-gold fade-in">
         <div class="card-title">💳 Withdraw Funds</div>
         <div style="background:var(--surface2);border-radius:10px;padding:10px;margin-bottom:12px;font-size:11px;color:var(--text2);line-height:1.6">
           <strong style="color:var(--amber)">Withdrawal Rules</strong><br>
           • Minimum: <strong>200 ETB</strong><br>
+          • Must have at least one deposit of 50+ ETB<br>
           • Total games played (excl. left): at least <strong>15</strong><br>
           • Must play <strong>5 games today</strong> before withdrawing<br>
           • Only <strong>1 withdrawal per day</strong><br>
-          • Must deposit <strong>at least 50 ETB</strong> and have <strong> 50 ETB</strong>remaining in your balance.<br> 
+          • After withdrawal, balance must be ≥ 50 ETB<br>
           • Processing: ~1 hour
         </div>
+        <div id="wd-error" class="error-box"></div>
         <label class="label">Payment Method <span style="color:var(--red)">*</span></label>
         <div style="display:flex;gap:8px;margin-bottom:4px">
           <div id="wd-bank-cbe" onclick="selectWdBank('CBE')" style="flex:1;border:2px solid var(--border);border-radius:10px;padding:10px;text-align:center;cursor:pointer;transition:all .2s;font-size:13px;font-weight:700">🏦 CBE</div>
@@ -1141,7 +1126,7 @@ body::before {
       </div>
     </div>
 
-    <!-- ── FRIENDS ── -->
+    <!-- ── FRIENDS (with progress bar) ── -->
     <div class="screen" id="screen-friends">
       <div class="card card-gold fade-in">
         <div class="card-title">📨 Invite Friends</div>
@@ -1165,13 +1150,55 @@ body::before {
             <div style="font-size:11px;color:var(--text2)">For Next Bonus</div>
           </div>
         </div>
-        <div class="card-title" style="font-size:12px;margin-bottom:8px">Recent Friends</div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="ref-progress"></div>
+        </div>
+        <div id="ref-next-message" style="font-size:11px; color:var(--text3); margin-top:5px;"></div>
+        <div class="card-title" style="font-size:12px;margin-bottom:8px;margin-top:12px">Recent Friends</div>
         <div id="friends-list" style="font-size:12px;color:var(--text2)"><div class="empty">Loading…</div></div>
         <button class="btn btn-ghost" style="margin-top:12px" onclick="shareReferralTelegram()">📤 Share via Telegram</button>
       </div>
     </div>
 
-    <!-- Add INSTRUCTIONS screen -->
+    <!-- ── ADMIN ── -->
+    <div class="screen" id="screen-admin">
+      <div class="card card-gold fade-in">
+        <div class="card-title" style="color:var(--red)">⚙️ Admin Dashboard</div>
+        <div class="stat-grid" id="admin-stats"></div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-title">💰 Adjust Wallet</div>
+        <label class="label">Username</label>
+        <input class="input" id="admin-uname" placeholder="Enter username" list="admin-uname-list" autocomplete="off">
+        <datalist id="admin-uname-list"></datalist>
+        <label class="label">Amount (+ add  /  − deduct)</label>
+        <input class="input" id="admin-amt" type="number" placeholder="e.g. 500 or -200">
+        <button class="btn btn-gold" onclick="adminAdjust()">APPLY ADJUSTMENT</button>
+      </div>
+      <div class="card fade-in">
+        <div class="card-title">🎮 Active Games</div>
+        <div id="admin-games-list"></div>
+        <button class="btn btn-ghost" style="margin-top:8px" onclick="loadAdminGames()">↻ Refresh</button>
+      </div>
+      <div class="card fade-in" id="admin-manage-admins-card" style="display:none">
+        <div class="card-title" style="color:var(--gold)">👑 Manage Admins <span style="font-size:10px;color:var(--text3)">(Owner only)</span></div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:10px">Promoted admins can approve deposits/withdrawals but cannot promote others.</div>
+        <label class="label">Username to Promote / Demote</label>
+        <input class="input" id="admin-promote-uname" placeholder="Enter Admin username" list="admin-uname-list" autocomplete="off">
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-gold" style="flex:1" onclick="adminSetAdmin(true)">👑 Make Admin</button>
+          <button class="btn btn-ghost" style="flex:1" onclick="adminSetAdmin(false)">🚫 Remove Admin</button>
+        </div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-title">👥 Users <span id="admin-user-count" style="font-size:11px;color:var(--text3);font-weight:400"></span></div>
+        <input class="input" id="admin-user-search" placeholder="Search username or TG ID…" style="margin-bottom:10px" oninput="loadAdminUsers()">
+        <div id="admin-users-list"></div>
+        <button class="btn btn-ghost" style="margin-top:8px" onclick="loadAdminUsers()">↻ Refresh</button>
+      </div>
+    </div>
+
+    <!-- ── INSTRUCTIONS SCREEN ── -->
     <div class="screen" id="screen-instructions">
       <div class="card card-gold fade-in">
         <div class="card-title">📖 Game Instructions</div>
@@ -1221,47 +1248,6 @@ body::before {
       </div>
     </div>
 
-
-
-     
-    <!-- ── ADMIN ── -->
-    <div class="screen" id="screen-admin">
-      <div class="card card-gold fade-in">
-        <div class="card-title" style="color:var(--red)">⚙️ Admin Dashboard</div>
-        <div class="stat-grid" id="admin-stats"></div>
-      </div>
-      <div class="card fade-in">
-        <div class="card-title">💰 Adjust Wallet</div>
-        <label class="label">Username</label>
-        <input class="input" id="admin-uname" placeholder="Enter username" list="admin-uname-list" autocomplete="off">
-        <datalist id="admin-uname-list"></datalist>
-        <label class="label">Amount (+ add  /  − deduct)</label>
-        <input class="input" id="admin-amt" type="number" placeholder="e.g. 500 or -200">
-        <button class="btn btn-gold" onclick="adminAdjust()">APPLY ADJUSTMENT</button>
-      </div>
-      <div class="card fade-in">
-        <div class="card-title">🎮 Active Games</div>
-        <div id="admin-games-list"></div>
-        <button class="btn btn-ghost" style="margin-top:8px" onclick="loadAdminGames()">↻ Refresh</button>
-      </div>
-      <div class="card fade-in" id="admin-manage-admins-card" style="display:none">
-        <div class="card-title" style="color:var(--gold)">👑 Manage Admins <span style="font-size:10px;color:var(--text3)">(Owner only)</span></div>
-        <div style="font-size:11px;color:var(--text2);margin-bottom:10px">Promoted admins can approve deposits/withdrawals but cannot promote others.</div>
-        <label class="label">Username to Promote / Demote</label>
-        <input class="input" id="admin-promote-uname" placeholder="Enter Admin username" list="admin-uname-list" autocomplete="off">
-        <div style="display:flex;gap:8px;margin-top:10px">
-          <button class="btn btn-gold" style="flex:1" onclick="adminSetAdmin(true)">👑 Make Admin</button>
-          <button class="btn btn-ghost" style="flex:1" onclick="adminSetAdmin(false)">🚫 Remove Admin</button>
-        </div>
-      </div>
-      <div class="card fade-in">
-        <div class="card-title">👥 Users <span id="admin-user-count" style="font-size:11px;color:var(--text3);font-weight:400"></span></div>
-        <input class="input" id="admin-user-search" placeholder="Search username or TG ID…" style="margin-bottom:10px" oninput="loadAdminUsers()">
-        <div id="admin-users-list"></div>
-        <button class="btn btn-ghost" style="margin-top:8px" onclick="loadAdminUsers()">↻ Refresh</button>
-      </div>
-    </div>
-
   </div>
 
   <!-- FOOTER -->
@@ -1272,6 +1258,17 @@ body::before {
   </div>
 
 </div><!-- /#app -->
+
+<!-- Sound effects and loading overlay -->
+<audio id="sound-bingo" preload="auto">
+  <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" type="audio/mpeg">
+</audio>
+<audio id="sound-call" preload="auto">
+  <source src="https://www.soundjay.com/misc/sounds/beep-07.mp3" type="audio/mpeg">
+</audio>
+<div id="loading-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:10000; align-items:center; justify-content:center;">
+  <div class="spinner" style="width:40px; height:40px;"></div>
+</div>
 
 <!-- Leave Game Modal -->
 <div id="leave-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);align-items:center;justify-content:center;padding:20px">
@@ -1310,7 +1307,7 @@ window.addEventListener('resize', _setVh);
 window.addEventListener('orientationchange', () => setTimeout(_setVh, 200));
 _setVh();
 const BET_AMOUNTS = [10, 20, 50, 100];
-const MIN_WITHDRAW = 200;        // Updated minimum
+const MIN_WITHDRAW = 200;
 
 /* ══════════════════════════════════════════════════════════
    STATE
@@ -1334,12 +1331,11 @@ const S = {
 };
 
 /* ══════════════════════════════════════════════════════════
-   API HELPER
+   API HELPER (with base64 encoding for emoji safety)
 ══════════════════════════════════════════════════════════ */
 async function api(method, path, body = null) {
   const headers = { 'Content-Type': 'application/json' };
   if (S.tgUser) {
-    // Encode user object to base64 to avoid header encoding issues with emojis
     const userJson = JSON.stringify(S.tgUser);
     const base64User = btoa(unescape(encodeURIComponent(userJson)));
     headers['X-Tg-User'] = base64User;
@@ -1350,6 +1346,77 @@ async function api(method, path, body = null) {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
   return data;
+}
+
+/* ══════════════════════════════════════════════════════════
+   LOADING STATES
+══════════════════════════════════════════════════════════ */
+function showLoading(show) {
+  const overlay = document.getElementById('loading-overlay');
+  if (overlay) overlay.style.display = show ? 'flex' : 'none';
+}
+
+/* ══════════════════════════════════════════════════════════
+   INLINE ERROR MESSAGES
+══════════════════════════════════════════════════════════ */
+function showInlineError(elementId, message) {
+  const errDiv = document.getElementById(elementId);
+  if (errDiv) {
+    errDiv.textContent = message;
+    errDiv.style.display = 'block';
+    setTimeout(() => { errDiv.style.display = 'none'; }, 5000);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   SOUND EFFECTS
+══════════════════════════════════════════════════════════ */
+let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+function playSound(soundId) {
+  if (!soundEnabled) return;
+  const audio = document.getElementById(soundId);
+  if (audio) {
+    audio.currentTime = 0;
+    audio.play().catch(e => console.log('Audio play failed:', e));
+  }
+}
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  localStorage.setItem('soundEnabled', soundEnabled);
+  const btn = document.getElementById('sound-toggle');
+  if (btn) btn.textContent = soundEnabled ? '🔊' : '🔇';
+}
+// Add sound toggle to profile screen later in renderNav
+
+/* ══════════════════════════════════════════════════════════
+   SHARE WIN TO TELEGRAM
+══════════════════════════════════════════════════════════ */
+async function shareWin(prize, gameId) {
+  try {
+    await api('POST', '/api/share-win', { prize, game_id: gameId });
+  } catch(e) { console.warn('Share win failed', e); }
+}
+
+/* ══════════════════════════════════════════════════════════
+   GAME RECONNECTION LOGIC
+══════════════════════════════════════════════════════════ */
+async function attemptReconnect() {
+  const savedGameId = localStorage.getItem('lastGameId');
+  if (!savedGameId) return false;
+  try {
+    const gm = await api('GET', `/api/games/${savedGameId}`);
+    if (gm.my_player && ['waiting','countdown','active'].includes(gm.status)) {
+      S.currentGameId = savedGameId;
+      S.myCard = gm.my_player.card;
+      S.myMarked = gm.my_player.marked_cells;
+      showScreen('screen-game');
+      startGameScreen();
+      toast('Reconnected to game!', 'success');
+      return true;
+    }
+  } catch(e) {}
+  localStorage.removeItem('lastGameId');
+  return false;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1467,6 +1534,12 @@ async function onLoggedIn() {
   renderNav();
   document.getElementById('header').style.display = 'flex';
   document.getElementById('footer').style.display = 'flex';
+  
+  // Try to reconnect to an existing game first
+  const reconnected = await attemptReconnect();
+  if (reconnected) return;
+  
+  // Check if user is already in an active/waiting game and resume it
   try {
     const games = await api('GET', '/api/games');
     const myUsername = S.user?.username;
@@ -1508,8 +1581,11 @@ function renderNav() {
     { icon:'📨', label:'Invite Friends', screen:'screen-friends',     fn:'loadFriends' },
     { icon:'🏆', label:'Leaderboard',    screen:'screen-leaderboard', fn:'loadLeaderboard' },
     { icon:'📜', label:'History',        screen:'screen-history',     fn:'loadHistory' },
+    { icon:'📖', label:'Instructions',   screen:'screen-instructions', fn:null },
   ];
   if (u?.is_admin) items.push({ icon:'⚙️', label:'Admin Panel', screen:'screen-admin', fn:'loadAdmin' });
+  
+  // Also add a sound toggle to the profile later; we'll add it as a separate element in profile screen
   document.getElementById('nav-items').innerHTML = items.map(i =>
     `<div class="nav-item" onclick="navTo('${i.screen}','${i.fn||''}')">
       <span class="nav-icon">${i.icon}</span>${i.label}
@@ -1522,7 +1598,11 @@ function renderNav() {
         <div class="nav-user-name">${u.username}</div>
         <div class="nav-user-bal">${u.balance.toLocaleString()} ETB</div>
       </div>
-    </div>` : '';
+    </div>
+    <div style="margin-top:8px; display:flex; justify-content:center;">
+      <div class="sound-toggle" id="sound-toggle" onclick="toggleSound()">${soundEnabled ? '🔊' : '🔇'}</div>
+    </div>
+  ` : '';
 }
 
 function navTo(screen, fn) {
@@ -1530,6 +1610,7 @@ function navTo(screen, fn) {
   if (fn && typeof window[fn] === 'function') window[fn]();
   showScreen(screen);
 }
+
 /* ══ DEPOSIT / WITHDRAW / FRIENDS ══════════════════════════════════════ */
 function copyText(txt, label) {
   if (navigator.clipboard) navigator.clipboard.writeText(txt).then(()=>toast(`${label} copied!`,'success'));
@@ -1560,6 +1641,7 @@ async function submitDeposit() {
   if (!name) { toast('Enter your name as it appears on the payment','error'); return; }
   if (!amt||parseFloat(amt)<10) { toast('Min deposit is 10 ETB','error'); return; }
   if (!ref)  { toast('Enter transaction reference/SMS code','error'); return; }
+  showLoading(true);
   try {
     await api('POST','/api/deposit-request',{amount:parseFloat(amt),reference:ref,sender_name:name});
     toast('✅ Deposit request sent! Credited within 1 hour.','success');
@@ -1567,10 +1649,13 @@ async function submitDeposit() {
     document.getElementById('dep-amount').value='';
     document.getElementById('dep-ref').value='';
     setTimeout(()=>showScreen('screen-lobby'),2500);
-  } catch(e) { toast(e.message||'Error','error'); }
+  } catch(e) {
+    showInlineError('dep-error', e.message);
+  } finally {
+    showLoading(false);
+  }
 }
 
-/* Withdrawal: let backend enforce all rules */
 async function submitWithdraw() {
   const bank  = (document.getElementById('wd-bank')?.value||'').trim();
   const phone = (document.getElementById('wd-phone')?.value||'').trim();
@@ -1580,6 +1665,7 @@ async function submitWithdraw() {
   if (!phone) { toast('Enter account/phone number','error'); return; }
   if (!aname) { toast('Enter account holder name','error'); return; }
   if (isNaN(amt) || amt < MIN_WITHDRAW) { toast(`Minimum withdrawal is ${MIN_WITHDRAW} ETB`,'error'); return; }
+  showLoading(true);
   try {
     await api('POST','/api/withdraw-request',{amount:amt,phone,bank,account_name:aname});
     toast('✅ Withdrawal request sent! Processed within ~1 hour.','success');
@@ -1588,7 +1674,11 @@ async function submitWithdraw() {
     });
     selectWdBank('');
     setTimeout(()=>showScreen('screen-lobby'),2500);
-  } catch(e) { toast(e.message||'Error','error'); }
+  } catch(e) {
+    showInlineError('wd-error', e.message);
+  } finally {
+    showLoading(false);
+  }
 }
 
 async function loadFriends() {
@@ -1596,7 +1686,7 @@ async function loadFriends() {
     const stats=await api('GET','/api/referral-stats');
     document.getElementById('friends-count').textContent=stats.referral_count||0;
     document.getElementById('friends-next').textContent=stats.next_bonus_at||10;
-    const botName='Zebi_Bingo_Bot';
+    const botName='Joker_Bingo_Bot';
     const link=`https://t.me/${botName}?start=${S.tgUser?.id||''}`;
     const le=document.getElementById('friends-link'); if(le)le.textContent=link;
     const listEl=document.getElementById('friends-list');
@@ -1604,6 +1694,14 @@ async function loadFriends() {
     listEl.innerHTML=fr.length
       ?fr.map(f=>`<div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><span>👤 ${f.username}</span><span style="color:var(--text3);font-size:11px">${String(f.created_at||'').slice(0,10)}</span></div>`).join('')
       :'<div class="empty" style="padding:20px 0">No friends yet — share your link!</div>';
+    // Update progress bar
+    const rc = stats.referral_count || 0;
+    const per = stats.per_bonus || 10;
+    const progress = ((rc % per) / per) * 100;
+    const fill = document.getElementById('ref-progress');
+    if (fill) fill.style.width = `${progress}%`;
+    const msg = document.getElementById('ref-next-message');
+    if (msg) msg.textContent = `${per - (rc % per)} more referrals until +${stats.bonus_amount} ETB!`;
   } catch(e){ toast('Could not load friends','error'); }
 }
 function copyReferralLink() {
@@ -1623,6 +1721,7 @@ function goToLobby() {
   clearTimeout(S.gamePolling);
   S.gamePolling = null;
   S.currentGameId = null;
+  localStorage.removeItem('lastGameId');
   refreshLobby();
   startLobbyPolling();
 }
@@ -1710,15 +1809,20 @@ function statusLabel(s) {
 async function createAndJoin() {
   if (!S.selectedBet) { toast('Select a bet amount first', 'error'); return; }
   if (S.user?.balance < S.selectedBet) { toast('Insufficient balance', 'error'); return; }
+  showLoading(true);
   try {
     const res = await api('POST', '/api/games', { bet_amount: S.selectedBet });
     await enterPickerForGame(res.id);
   } catch (e) { toast(e.message, 'error'); }
+  finally { showLoading(false); }
 }
 
 async function joinExistingGame(gameId) {
   if (S.user?.balance < S.selectedBet) { toast('Insufficient balance', 'error'); return; }
-  await enterPickerForGame(gameId);
+  showLoading(true);
+  try {
+    await enterPickerForGame(gameId);
+  } finally { showLoading(false); }
 }
 
 let _pickerPollInterval = null;
@@ -1856,6 +1960,10 @@ function _tickCallDisplay() {
     el.classList.add('num-pop');
     document.getElementById('called-count').textContent = idx + 1;
     renderCalledBubbles(_calledNumbers.slice(0, idx + 1));
+    // Highlight called number on card and play sound
+    const numValue = parseInt(num.split('-')[1]);
+    highlightCalledOnCard(numValue);
+    playSound('sound-call');
   }
 }
 
@@ -1988,13 +2096,14 @@ async function proceedToGame() {
    GAME SCREEN
 ══════════════════════════════════════════════════════════ */
 function startGameScreen() {
+  localStorage.setItem('lastGameId', S.currentGameId);
   S.prevCalledLen = 0;
   const cb = document.getElementById('bingo-claim-btn');
   if (cb) cb.style.display = 'inline-block';
   renderGameCard();
   pollGame();
   function _scheduleGamePoll() {
-    const interval = _gameIsActive ? 2000 : 3000;
+    const interval = _gameIsActive ? 1000 : 3000;
     S.gamePolling = setTimeout(async () => {
       await pollGame();
       if (S.currentGameId) _scheduleGamePoll();
@@ -2077,8 +2186,9 @@ function renderCalledBubbles(called) {
 
 function highlightCalledOnCard(num) {
   document.querySelectorAll('#game-card-grid .bc-cell').forEach(el => {
-    if (parseInt(el.dataset.value) === num) {
+    if (parseInt(el.textContent) === num) {
       el.classList.add('called-hl');
+      setTimeout(() => el.classList.remove('called-hl'), 500);
     }
   });
 }
@@ -2140,6 +2250,8 @@ async function doClaim(cardId=1) {
       clearTimeout(S.gamePolling);
       _lastPrize = res.prize;
       S.user = res.user; renderHeader(); renderNav();
+      playSound('sound-bingo');
+      shareWin(res.prize, S.currentGameId);
       showBingoOverlay(res.prize);
     }
   } catch (e) { toast(e.message, 'error'); }
@@ -2160,6 +2272,9 @@ function hideBingoOverlay() {
 
 function handleGameFinished(gm) {
   clearTimeout(S.gamePolling);
+  _calledNumbers = [];
+  _gameStartedAt = 0;
+  _stopCallTicker();
   if (gm.winner_id) {
     const winner = gm.players?.find(p => p.has_bingo);
     const iWon   = winner && winner.username === S.user?.username;
@@ -2215,6 +2330,7 @@ function showResult(won, balance, winnerName, kicked=false, forfeited=false, for
   _stopCallTicker();
   _calledNumbers=[]; _gameStartedAt=0;
   S.currentGameId=null; S.myCard=null; _countdownStarted=false;
+  localStorage.removeItem('lastGameId');
   startLobbyPolling();
 }
 
@@ -2251,6 +2367,7 @@ async function playAgain() {
   if (!S.lastBet || !S.lastPickedNum) {
     showScreen('screen-lobby'); refreshLobby(); return;
   }
+  showLoading(true);
   try {
     const gm = await api('POST', '/api/games', { bet_amount: S.lastBet });
     const joined = await api('POST', `/api/games/${gm.id}/join`, {
@@ -2272,7 +2389,7 @@ async function playAgain() {
     } catch(_) {
       showScreen('screen-lobby'); refreshLobby();
     }
-  }
+  } finally { showLoading(false); }
 }
 
 function resultChangeLucky() {
@@ -2302,6 +2419,7 @@ async function doLeave(confirmed) {
       if (res.refunded) {
         S.currentGameId=null; S.myCard=null; S.myMarked=[[2,2]];
         _countdownStarted=false;
+        localStorage.removeItem('lastGameId');
         showScreen('screen-lobby'); startLobbyPolling();
         return;
       }
@@ -2319,6 +2437,7 @@ async function doLeave(confirmed) {
   }
   S.currentGameId=null; S.myCard=null; S.myMarked=[[2,2]];
   _countdownStarted=false;
+  localStorage.removeItem('lastGameId');
   showScreen('screen-lobby'); startLobbyPolling();
 }
 
@@ -2328,6 +2447,7 @@ async function doLeave(confirmed) {
 async function loadLeaderboard() {
   const el = document.getElementById('leaderboard-list');
   el.innerHTML = '<div class="empty">Loading…</div>';
+  showLoading(true);
   try {
     const rows = await api('GET', '/api/leaderboard');
     if (!rows.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">🏆</div>No players yet.</div>'; return; }
@@ -2341,6 +2461,7 @@ async function loadLeaderboard() {
         </div>
       </div>`).join('');
   } catch (e) { el.innerHTML = '<div class="empty">Could not load leaderboard.</div>'; }
+  finally { showLoading(false); }
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -2349,6 +2470,7 @@ async function loadLeaderboard() {
 async function loadHistory() {
   const el = document.getElementById('history-list');
   el.innerHTML = '<div class="empty">Loading…</div>';
+  showLoading(true);
   try {
     const rows = await api('GET', '/api/history');
     if (!rows.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📜</div>No games played yet.</div>'; return; }
@@ -2370,6 +2492,7 @@ async function loadHistory() {
       </div>`;
     }).join('');
   } catch (e) { el.innerHTML = '<div class="empty">Could not load history.</div>'; }
+  finally { showLoading(false); }
 }
 
 function goToHistory() { loadHistory(); showScreen('screen-history'); }
@@ -2398,136 +2521,4 @@ async function loadAdminStats() {
 async function loadAdminGames() {
   const el = document.getElementById('admin-games-list');
   try {
-    const games = await api('GET', '/api/admin/games');
-    const active = games.filter(g=>g.status!=='finished');
-    if (!active.length) { el.innerHTML = '<div class="empty">No active games.</div>'; return; }
-    el.innerHTML = active.map(g=>`
-      <div class="user-row">
-        <div class="u-info">
-          <div class="u-name">${g.id}</div>
-          <div class="u-meta">${g.bet_amount} ETB · ${g.player_count} players · ${statusLabel(g.status)}</div>
-        </div>
-        <button class="btn btn-danger btn-sm" onclick="adminForceFinish('${g.id}')">End</button>
-      </div>`).join('');
-  } catch (_) { el.innerHTML = '<div class="empty">Error loading games.</div>'; }
-}
-
-async function loadAdminUsers() {
-  const el = document.getElementById('admin-users-list');
-  const q  = document.getElementById('admin-user-search')?.value.trim() || '';
-  try {
-    const res   = await api('GET', '/api/admin/users' + (q ? `?q=${encodeURIComponent(q)}` : ''));
-    const users = res.users || (Array.isArray(res) ? res : []);
-    const total = res.total || users.length;
-    const dl = document.getElementById('admin-uname-list');
-    if (dl) dl.innerHTML = users.map(u=>`<option value="${u.username}">${u.username} — ${u.balance.toLocaleString()} ETB</option>`).join('');
-    const countEl = document.getElementById('admin-user-count');
-    if (countEl) countEl.textContent = q ? `(${users.length} found)` : `(${total} total)`;
-    if (!users.length) { el.innerHTML = '<div class="empty">No users found.</div>'; return; }
-    el.innerHTML = users.map(u=>`
-      <div class="user-row" onclick="document.getElementById('admin-uname').value='${u.username}'" style="cursor:pointer">
-        <div class="u-avatar">${u.username[0].toUpperCase()}</div>
-        <div class="u-info">
-          <div class="u-name">${u.username} ${u.is_admin?'<span class="u-badge badge-admin">ADMIN</span>':''}</div>
-          <div class="u-meta">${u.wins}W · ${u.games_played}G · ${u.balance.toLocaleString()} ETB · TG:${u.tg_id}</div>
-        </div>
-      </div>`).join('');
-  } catch (_) { el.innerHTML = '<div class="empty">Error loading users.</div>'; }
-}
-
-async function adminSetAdmin(makeAdmin) {
-  const username = (document.getElementById('admin-promote-uname')?.value || '').trim();
-  if (!username) { toast('Enter a username', 'error'); return; }
-  try {
-    const res = await api('GET', '/api/admin/users?q=' + encodeURIComponent(username));
-    const users = res.users || (Array.isArray(res) ? res : []);
-    const target = users.find(u => u.username === username);
-    if (!target) { toast('User not found', 'error'); return; }
-    await api('POST', `/api/admin/users/${target.id}/admin`, { is_admin: makeAdmin });
-    toast(makeAdmin ? `✅ ${username} is now admin` : `✅ ${username} admin removed`, 'success');
-    loadAdminUsers();
-  } catch(e) { toast(e.message || 'Error', 'error'); }
-}
-
-async function adminAdjust() {
-  const username = document.getElementById('admin-uname').value.trim();
-  const amount   = parseInt(document.getElementById('admin-amt').value);
-  if (!username || isNaN(amount)) { toast('Fill in username and amount', 'error'); return; }
-  try {
-    const res = await api('POST', '/api/admin/funds', { username, amount });
-    toast(`${res.username} new balance: ${res.new_balance.toLocaleString()} ETB`, 'success');
-    loadAdminStats();
-  } catch (e) { toast(e.message, 'error'); }
-}
-
-async function adminForceFinish(gid) {
-  if (!confirm(`Force finish game ${gid}? Players will be refunded.`)) return;
-  try {
-    const res = await api('POST', `/api/admin/games/${gid}/finish`);
-    toast(`Game ended. ${res.refunded} players refunded.`, 'success');
-    loadAdminGames();
-  } catch (e) { toast(e.message, 'error'); }
-}
-
-/* ══════════════════════════════════════════════════════════
-   THEME
-══════════════════════════════════════════════════════════ */
-function toggleTheme() { applyTheme(!S.isLightMode, true); }
-function applyTheme(light, save) {
-  S.isLightMode = light;
-  document.documentElement.classList.toggle('light-mode', light);
-  document.getElementById('theme-toggle')?.classList.toggle('on', light);
-  if (save) localStorage.setItem('bb_theme', light ? 'light' : 'dark');
-}
-
-/* ══════════════════════════════════════════════════════════
-   UTILITIES
-══════════════════════════════════════════════════════════ */
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  const el = document.getElementById(id);
-  if (el) el.classList.add('active');
-}
-
-function stopLobbyPolling() {
-  if (S.lobbyPolling) { clearInterval(S.lobbyPolling); S.lobbyPolling = null; }
-}
-
-function formatTime(secs) {
-  const m = Math.floor(secs / 60);
-  const s = secs % 60;
-  return `${m}:${String(s).padStart(2,'0')}`;
-}
-
-let _toastTimeout;
-function toast(msg, type = 'info') {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = `show toast-${type}`;
-  clearTimeout(_toastTimeout);
-  _toastTimeout = setTimeout(() => { el.className = ''; }, type === 'error' ? 5500 : 3200);
-}
-
-function spawnConfetti() {
-  const c = document.getElementById('confetti-container');
-  c.innerHTML = '';
-  const colors = ['#f5a623','#ffcc55','#2de388','#4facfe','#f54e4e','#fff'];
-  for (let i = 0; i < 60; i++) {
-    const p = document.createElement('div');
-    p.className = 'confetti-piece';
-    p.style.cssText = `
-      left:${Math.random()*100}%;
-      top:${-10 - Math.random()*30}px;
-      background:${colors[Math.floor(Math.random()*colors.length)]};
-      animation-delay:${Math.random()*1.5}s;
-      animation-duration:${2+Math.random()*1.5}s;
-      width:${6+Math.random()*6}px;
-      height:${6+Math.random()*6}px;
-      border-radius:${Math.random()>0.5?'50%':'2px'};
-    `;
-    c.appendChild(p);
-  }
-}
-</script>
-</body>
-</html>
+    const games = await api('GET
