@@ -2521,4 +2521,136 @@ async function loadAdminStats() {
 async function loadAdminGames() {
   const el = document.getElementById('admin-games-list');
   try {
-    const games = await api('GET
+    const games = await api('GET', '/api/admin/games');
+    const active = games.filter(g=>g.status!=='finished');
+    if (!active.length) { el.innerHTML = '<div class="empty">No active games.</div>'; return; }
+    el.innerHTML = active.map(g=>`
+      <div class="user-row">
+        <div class="u-info">
+          <div class="u-name">${g.id}</div>
+          <div class="u-meta">${g.bet_amount} ETB · ${g.player_count} players · ${statusLabel(g.status)}</div>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="adminForceFinish('${g.id}')">End</button>
+      </div>`).join('');
+  } catch (_) { el.innerHTML = '<div class="empty">Error loading games.</div>'; }
+}
+
+async function loadAdminUsers() {
+  const el = document.getElementById('admin-users-list');
+  const q  = document.getElementById('admin-user-search')?.value.trim() || '';
+  try {
+    const res   = await api('GET', '/api/admin/users' + (q ? `?q=${encodeURIComponent(q)}` : ''));
+    const users = res.users || (Array.isArray(res) ? res : []);
+    const total = res.total || users.length;
+    const dl = document.getElementById('admin-uname-list');
+    if (dl) dl.innerHTML = users.map(u=>`<option value="${u.username}">${u.username} — ${u.balance.toLocaleString()} ETB</option>`).join('');
+    const countEl = document.getElementById('admin-user-count');
+    if (countEl) countEl.textContent = q ? `(${users.length} found)` : `(${total} total)`;
+    if (!users.length) { el.innerHTML = '<div class="empty">No users found.</div>'; return; }
+    el.innerHTML = users.map(u=>`
+      <div class="user-row" onclick="document.getElementById('admin-uname').value='${u.username}'" style="cursor:pointer">
+        <div class="u-avatar">${u.username[0].toUpperCase()}</div>
+        <div class="u-info">
+          <div class="u-name">${u.username} ${u.is_admin?'<span class="u-badge badge-admin">ADMIN</span>':''}</div>
+          <div class="u-meta">${u.wins}W · ${u.games_played}G · ${u.balance.toLocaleString()} ETB · TG:${u.tg_id}</div>
+        </div>
+      </div>`).join('');
+  } catch (_) { el.innerHTML = '<div class="empty">Error loading users.</div>'; }
+}
+
+async function adminSetAdmin(makeAdmin) {
+  const username = (document.getElementById('admin-promote-uname')?.value || '').trim();
+  if (!username) { toast('Enter a username', 'error'); return; }
+  try {
+    const res = await api('GET', '/api/admin/users?q=' + encodeURIComponent(username));
+    const users = res.users || (Array.isArray(res) ? res : []);
+    const target = users.find(u => u.username === username);
+    if (!target) { toast('User not found', 'error'); return; }
+    await api('POST', `/api/admin/users/${target.id}/admin`, { is_admin: makeAdmin });
+    toast(makeAdmin ? `✅ ${username} is now admin` : `✅ ${username} admin removed`, 'success');
+    loadAdminUsers();
+  } catch(e) { toast(e.message || 'Error', 'error'); }
+}
+
+async function adminAdjust() {
+  const username = document.getElementById('admin-uname').value.trim();
+  const amount   = parseInt(document.getElementById('admin-amt').value);
+  if (!username || isNaN(amount)) { toast('Fill in username and amount', 'error'); return; }
+  try {
+    const res = await api('POST', '/api/admin/funds', { username, amount });
+    toast(`${res.username} new balance: ${res.new_balance.toLocaleString()} ETB`, 'success');
+    loadAdminStats();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function adminForceFinish(gid) {
+  if (!confirm(`Force finish game ${gid}? Players will be refunded.`)) return;
+  try {
+    const res = await api('POST', `/api/admin/games/${gid}/finish`);
+    toast(`Game ended. ${res.refunded} players refunded.`, 'success');
+    loadAdminGames();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+/* ══════════════════════════════════════════════════════════
+   THEME
+══════════════════════════════════════════════════════════ */
+function toggleTheme() { applyTheme(!S.isLightMode, true); }
+function applyTheme(light, save) {
+  S.isLightMode = light;
+  document.documentElement.classList.toggle('light-mode', light);
+  document.getElementById('theme-toggle')?.classList.toggle('on', light);
+  if (save) localStorage.setItem('bb_theme', light ? 'light' : 'dark');
+}
+
+/* ══════════════════════════════════════════════════════════
+   UTILITIES
+══════════════════════════════════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+}
+
+function stopLobbyPolling() {
+  if (S.lobbyPolling) { clearInterval(S.lobbyPolling); S.lobbyPolling = null; }
+}
+
+function formatTime(secs) {
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+
+let _toastTimeout;
+function toast(msg, type = 'info') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `show toast-${type}`;
+  clearTimeout(_toastTimeout);
+  _toastTimeout = setTimeout(() => { el.className = ''; }, type === 'error' ? 5500 : 3200);
+}
+
+function spawnConfetti() {
+  const c = document.getElementById('confetti-container');
+  c.innerHTML = '';
+  const colors = ['#f5a623','#ffcc55','#2de388','#4facfe','#f54e4e','#fff'];
+  for (let i = 0; i < 60; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.cssText = `
+      left:${Math.random()*100}%;
+      top:${-10 - Math.random()*30}px;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      animation-delay:${Math.random()*1.5}s;
+      animation-duration:${2+Math.random()*1.5}s;
+      width:${6+Math.random()*6}px;
+      height:${6+Math.random()*6}px;
+      border-radius:${Math.random()>0.5?'50%':'2px'};
+    `;
+    c.appendChild(p);
+  }
+}
+</script>
+</body>
+</html>
