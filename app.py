@@ -1299,13 +1299,14 @@ TELEGRAM_CHANNEL_ID = os.environ.get('TELEGRAM_CHANNEL_ID', '')
 def share_win():
     user, _, err = require_auth()
     if err: return err
-    data = request.json or {}
-    prize = data.get('prize', 0)
+    data    = request.json or {}
+    prize   = data.get('prize', 0)
     game_id = data.get('game_id', '')
     if TELEGRAM_CHANNEL_ID:
         try:
             chan_id = int(TELEGRAM_CHANNEL_ID)
-            msg = (f"🏆 BINGO! <b>{user['username']}</b> just won <b>{prize:,} ETB</b> in game {game_id}! 🎉")
+            msg = (f"🏆 <b>{user['username']}</b> just won "
+                   f"<b>{prize:,} ETB</b> playing Benz Bingo! 🎱🎉")
             _tg_notify_direct(chan_id, msg)
         except Exception:
             pass
@@ -1455,16 +1456,15 @@ def admin_funds():
         event = 'deposit_approved' if tx_type == 'deposit' else 'withdraw_approved'
         _notify_queue.put({'tg_id': int(target['tg_id']), 'event': event,
                            'data': {'amount': amt_abs, 'new_balance': new_bal}})
-    return jsonify({'success': True, 'username': username, 'new_balance': new_bal})
-    # Share approval to channel
-    if TELEGRAM_CHANNEL_ID and tx_type == 'withdraw':
+    if tx_type == 'withdraw' and TELEGRAM_CHANNEL_ID:
         try:
             chan_id = int(TELEGRAM_CHANNEL_ID)
             chan_msg = (f"💸 <b>{target['username']}</b> withdrew "
-                        f"<b>{amt_abs:,} ETB</b> from Joker Bingo.")
+                       f"<b>{amt_abs:,} ETB</b> from Benz Bingo.")
             _tg_notify_direct(chan_id, chan_msg)
         except Exception:
             pass
+    return jsonify({'success': True, 'username': username, 'new_balance': new_bal})
 
 @app.route('/api/admin/games/<gid>/finish', methods=['POST'])
 def admin_force_finish(gid):
@@ -1579,20 +1579,19 @@ def _check_withdrawal_eligibility(user, withdrawal_amount=None):
             return False, f"You need to play {remaining} more game(s) (total 15). You have played {total_games}."
 
         # 3. Games today
-        today_clause = "AND DATE(played_at) = CURRENT_DATE" if DB_TYPE == 'postgres' else "AND DATE(played_at) = DATE('now')"
+        _td = 'CURRENT_DATE' if DB_TYPE == 'postgres' else "DATE('now')"
         today_games = sdb.one(
-            f"SELECT COUNT(*) AS c FROM game_history WHERE user_id=? AND result != 'left' {today_clause}",
+            "SELECT COUNT(*) AS c FROM game_history WHERE user_id=? AND result != 'left' AND DATE(played_at) = " + _td,
             (uid,)
         )['c']
-        
         if today_games < 5:
             remaining_today = 5 - today_games
             return False, f"You need to play {remaining_today} more game(s) today. Played today: {today_games}."
 
         # 4. Daily withdrawal limit (1 per day)
-        date_clause = "AND DATE(created_at) = CURRENT_DATE" if DB_TYPE == 'postgres' else "AND DATE(created_at) = DATE('now')"
+        _td2 = 'CURRENT_DATE' if DB_TYPE == 'postgres' else "DATE('now')"
         wd_today = sdb.one(
-            f"SELECT COUNT(*) AS c FROM transactions WHERE tg_id=? AND type='withdraw_request' {date_clause}",
+            "SELECT COUNT(*) AS c FROM transactions WHERE tg_id=? AND type='withdraw_request' AND DATE(created_at) = " + _td2,
             (tg_id,)
         )['c']
         if wd_today >= 1:
@@ -1664,8 +1663,9 @@ def games_today():
     user, _, err = require_auth()
     if err: return err
     with StandaloneDB() as sdb:
+        _td3 = 'CURRENT_DATE' if DB_TYPE == 'postgres' else "DATE('now')"
         count = sdb.one(
-            "SELECT COUNT(*) AS c FROM game_history WHERE user_id=? AND result != 'left' AND DATE(played_at) = DATE('now')",
+            "SELECT COUNT(*) AS c FROM game_history WHERE user_id=? AND result != 'left' AND DATE(played_at) = " + _td3,
             (user['id'],)
         )['c']
     return jsonify({'count': count})
@@ -2469,6 +2469,14 @@ async def cmd_awdraw(message: Message, session: aiohttp.ClientSession):
                         (str(tid), 'withdraw', int(amt), wr_ref, f'admin:{message.from_user.id}'))
             except Exception:
                 pass  # ignore duplicate
+        if TELEGRAM_CHANNEL_ID:
+            try:
+                chan_id = int(TELEGRAM_CHANNEL_ID)
+                chan_msg = (f"💸 <b>{target['username']}</b> withdrew "
+                           f"<b>{int(amt):,} ETB</b> from Benz Bingo.")
+                _tg_notify_direct(chan_id, chan_msg)
+            except Exception:
+                pass
         await message.answer(f"✅ Withdrawal {amt:,.0f} ETB confirmed for <b>{target['username']}</b>.\nBalance: {res['new_balance']:,} ETB")
         _notify_queue.put({'tg_id': tid, 'event': 'withdraw_approved',
                           'data': {'amount': int(amt), 'new_balance': res['new_balance']}})
