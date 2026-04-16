@@ -1260,12 +1260,6 @@ body::before {
 </div><!-- /#app -->
 
 <!-- Sound effects and loading overlay -->
-<audio id="sound-bingo" preload="auto">
-  <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" type="audio/mpeg">
-</audio>
-<audio id="sound-call" preload="auto">
-  <source src="https://www.soundjay.com/misc/sounds/beep-07.mp3" type="audio/mpeg">
-</audio>
 <div id="loading-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:10000; align-items:center; justify-content:center;">
   <div class="spinner" style="width:40px; height:40px;"></div>
 </div>
@@ -1371,18 +1365,34 @@ function showInlineError(elementId, message) {
 /* ══════════════════════════════════════════════════════════
    SOUND EFFECTS
 ══════════════════════════════════════════════════════════ */
-let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
-function playSound(soundId) {
+let soundEnabled = true;  // in-memory; resets on app open
+function playSound(type) {
   if (!soundEnabled) return;
-  const audio = document.getElementById(soundId);
-  if (audio) {
-    audio.currentTime = 0;
-    audio.play().catch(e => console.log('Audio play failed:', e));
-  }
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (type === 'sound-call') {
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine'; osc.frequency.setValueAtTime(660, ctx.currentTime);
+      gain.gain.setValueAtTime(0.25, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.18);
+    } else if (type === 'sound-bingo') {
+      // Three-note win fanfare
+      [880, 1100, 1320].forEach((freq, i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type = 'sine'; o.frequency.value = freq;
+        const t = ctx.currentTime + i * 0.2;
+        g.gain.setValueAtTime(0.3, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+        o.start(t); o.stop(t + 0.28);
+      });
+    }
+  } catch(e) {}
 }
 function toggleSound() {
   soundEnabled = !soundEnabled;
-  localStorage.setItem('soundEnabled', soundEnabled);
   const btn = document.getElementById('sound-toggle');
   if (btn) btn.textContent = soundEnabled ? '🔊' : '🔇';
 }
