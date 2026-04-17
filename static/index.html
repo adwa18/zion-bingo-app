@@ -1322,6 +1322,7 @@ const S = {
   gamePolling:  null,
   lobbyPolling: null,
   prevCalledLen:0,
+  prevPlayerCount: 0,
 };
 
 /* ══════════════════════════════════════════════════════════
@@ -1370,25 +1371,95 @@ function playSound(type) {
   if (!soundEnabled) return;
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+    const osc = (freq, type='sine', start=0, dur=0.2, vol=0.3, ramp=0.001) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = type; o.frequency.setValueAtTime(freq, ctx.currentTime + start);
+      g.gain.setValueAtTime(vol, ctx.currentTime + start);
+      g.gain.exponentialRampToValueAtTime(ramp, ctx.currentTime + start + dur);
+      o.start(ctx.currentTime + start); o.stop(ctx.currentTime + start + dur);
+    };
+
+    const noise = (start=0, dur=0.1, vol=0.15) => {
+      const buf = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+      const src = ctx.createBufferSource(), g = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass'; filter.frequency.value = 800;
+      src.buffer = buf; src.connect(filter); filter.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(vol, ctx.currentTime + start);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+      src.start(ctx.currentTime + start); src.stop(ctx.currentTime + start + dur);
+    };
+
     if (type === 'sound-call') {
-      const osc = ctx.createOscillator(), gain = ctx.createGain();
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.type = 'sine'; osc.frequency.setValueAtTime(660, ctx.currentTime);
-      gain.gain.setValueAtTime(0.25, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
-      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.18);
+      // Number called — crisp double-blip
+      osc(880, 'sine', 0,    0.07, 0.2);
+      osc(660, 'sine', 0.09, 0.07, 0.15);
+
     } else if (type === 'sound-bingo') {
-      // Three-note win fanfare
-      [880, 1100, 1320].forEach((freq, i) => {
-        const o = ctx.createOscillator(), g = ctx.createGain();
-        o.connect(g); g.connect(ctx.destination);
-        o.type = 'sine'; o.frequency.value = freq;
-        const t = ctx.currentTime + i * 0.2;
-        g.gain.setValueAtTime(0.3, t);
-        g.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
-        o.start(t); o.stop(t + 0.28);
-      });
+      // BINGO claimed — epic ascending fanfare
+      osc(523, 'sine', 0,    0.18, 0.35);
+      osc(659, 'sine', 0.15, 0.18, 0.35);
+      osc(784, 'sine', 0.30, 0.18, 0.35);
+      osc(1047,'sine', 0.45, 0.35, 0.4);
+      osc(1319,'sine', 0.60, 0.5,  0.45);
+      // Shimmer on top
+      osc(2093,'triangle', 0.62, 0.4, 0.12);
+
+    } else if (type === 'win') {
+      // Win screen — triumphant chord + sparkle
+      [523, 659, 784, 1047].forEach((f, i) => osc(f, 'sine', i*0.06, 0.7, 0.25));
+      osc(1568, 'triangle', 0.3, 0.5, 0.15);
+      osc(2093, 'triangle', 0.45, 0.4, 0.1);
+      noise(0.28, 0.08, 0.08); // sparkle noise burst
+
+    } else if (type === 'lose') {
+      // Loss — descending sad trombone-ish
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(330, ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(180, ctx.currentTime + 0.5);
+      g.gain.setValueAtTime(0.2, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+      o.start(); o.stop(ctx.currentTime + 0.6);
+      osc(220, 'sine', 0.45, 0.4, 0.12);
+
+    } else if (type === 'btn') {
+      // Button press — satisfying soft click
+      noise(0, 0.04, 0.25);
+      osc(1200, 'sine', 0, 0.05, 0.08);
+
+    } else if (type === 'menu') {
+      // Menu open — soft whoosh + high chime
+      noise(0, 0.12, 0.12);
+      osc(1800, 'sine', 0.05, 0.15, 0.1);
+      osc(2400, 'triangle', 0.1, 0.1, 0.06);
+
+    } else if (type === 'countdown') {
+      // Countdown tick — deep mechanical click
+      osc(120, 'square', 0, 0.06, 0.3);
+      noise(0, 0.03, 0.2);
+
+    } else if (type === 'countdown-final') {
+      // Last 5 seconds — urgent high tick
+      osc(880,  'square', 0,    0.05, 0.3);
+      osc(1320, 'sine',   0.04, 0.05, 0.2);
+
+    } else if (type === 'join') {
+      // Player joined — friendly pop
+      osc(440, 'sine', 0,    0.1, 0.2);
+      osc(660, 'sine', 0.08, 0.12, 0.2);
+
+    } else if (type === 'forfeit') {
+      // Forfeit — short harsh buzz
+      osc(160, 'sawtooth', 0, 0.18, 0.25);
+      osc(140, 'square',   0.05, 0.12, 0.15);
     }
+
   } catch(e) {}
 }
 function toggleSound() {
@@ -1469,6 +1540,10 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
   } catch (_) {}
   showScreen('screen-welcome');
+  // ─── GLOBAL BUTTON SOUND ──────────────────────────────
+  document.querySelectorAll('.btn, .nav-btn, .bet-tile, .num-cell').forEach(el => {
+    el.addEventListener('pointerdown', () => playSound('btn'));
+  });
 });
 
 /* ══════════════════════════════════════════════════════════
@@ -1740,6 +1815,7 @@ function openNav()  {
     toast('Leave or forfeit the game first to access the menu.', 'error');
     return;
   }
+  playSound('menu');
   document.getElementById('nav-drawer').classList.add('open');
   document.getElementById('nav-overlay').classList.add('open');
 }
@@ -2126,6 +2202,15 @@ async function pollGame() {
   if (!S.currentGameId) return;
   try {
     const gm = await api('GET', '/api/games/' + S.currentGameId);
+    
+    // ─── TRACK PLAYER COUNT FOR JOIN SOUND ─────────────────
+    if (typeof S.prevPlayerCount === 'undefined') S.prevPlayerCount = 0;
+    if (gm.player_count > S.prevPlayerCount) {
+      playSound('join');
+    }
+    S.prevPlayerCount = gm.player_count;
+    // ───────────────────────────────────────────────────────
+
     if (gm.my_player) {
       if (!S.myCard && gm.my_player.card) { S.myCard=gm.my_player.card; renderGameCard(); }
       S.myMarked = gm.my_player.marked_cells || [[2,2]];
@@ -2309,12 +2394,14 @@ function showResult(won, balance, winnerName, kicked=false, forfeited=false, for
   }
   const el = document.getElementById('result-inner');
   if (won) {
+    playSound('win'); 
     el.innerHTML = `<div class="card card-gold win-bg fade-in" style="text-align:center;margin-bottom:12px">
       <div class="result-icon">🏆</div><div class="result-title" style="color:var(--gold)">YOU WIN!</div>
       <div class="result-prize">+${(balance||0).toLocaleString()} ETB Balance</div>
       <div class="result-sub">Winnings added to your wallet.</div></div>`;
   } else {
     if (forfeited) {
+      playSound('forfeit');
       el.innerHTML = `<div class="card lose-bg fade-in" style="text-align:center;margin-bottom:12px">
         <div class="result-icon">🏳️</div>
         <div class="result-title" style="color:var(--red)">FORFEITED</div>
@@ -2322,6 +2409,7 @@ function showResult(won, balance, winnerName, kicked=false, forfeited=false, for
         <div class="result-prize" style="color:var(--red)">-${forfeitedAmt.toLocaleString()} ETB</div>
         <div class="result-sub">Your bet was forfeited. Better luck next time!</div></div>`;
     } else {
+    playSound('lose');
     const icon = kicked ? '🚫' : (winnerName === '__last_standing__' ? '🏆' : '😔');
     const title= kicked ? 'KICKED!' : (winnerName === '__last_standing__' ? 'YOU WIN!' : 'GAME OVER');
     const col  = winnerName === '__last_standing__' ? 'var(--green)' : (kicked ? 'var(--red)' : 'var(--red)');
@@ -2361,6 +2449,14 @@ function _startCountdownTick(initialSecs) {
   _countdownTicker = setInterval(() => {
     _countdownValue = Math.max(0, _countdownValue - 1);
     _updateCountdownDisplay();
+    if (_countdownValue > 0) {
+      if (_countdownValue <= 5) {
+        playSound('countdown-final');
+      } else {
+        playSound('countdown');
+      }
+    }
+   
   }, 1000);
 }
 
