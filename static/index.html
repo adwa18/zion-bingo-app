@@ -2141,7 +2141,7 @@ async function pollGame() {
     if (gm.status === 'waiting' || gm.status === 'countdown') {
       if (leaveBtn) leaveBtn.textContent = t('btn_leave');
       showPhase('phase-waiting');
-      document.getElementById('game-player-count').textContent = gm.player_count t('game_players', gm.player_count)  //;
+      document.getElementById('game-player-count').textContent = t('game_players', gm.player_count);
       document.getElementById('game-room-label').textContent = gm.id;
       if (gm.status === 'waiting') {
         _stopCountdownTick(); _stopCallTicker();
@@ -2165,7 +2165,7 @@ async function pollGame() {
       showPhase('phase-active');
       const called = gm.called_numbers || [];
       document.getElementById('called-count').textContent = called.length;
-      document.getElementById('active-player-count').textContent = gm.player_count t('game_players', gm.player_count);
+      document.getElementById('active-player-count').textContent = t('game_players', gm.player_count);
       if (gm.server_time) {
         _clockOffset = gm.server_time * 1000 - Date.now();
       }
@@ -2852,8 +2852,8 @@ const TRANSLATIONS = {
   am: {
     // ── Welcome ──
     welcome_greeting:     (name) => `ሰላም, ${name}! 👋`,
-    welcome_tagline:      'ምርጡን ቢንጎ ጨዋታ ይቀላቀሉን!',
-    welcome_sub:          'ዕድለኛ ቁጥርዎን ይምረጡ · ካርድዎ ላይ ምልክት ያድርጉ · ቢንጎ ይበሉ!\n10–100 ብር ይመድቡ · በየዙሩ ትልቅ ሽልማት ያሸንፉ።',
+    welcome_tagline:      'የምርጥ ቢንጎ ተሞክሮ',
+    welcome_sub:          'ቁጥርዎን ይምረጡ · ካርዶን ምልክት ያድርጉ · ቢንጎ ይበሉ!\n10–100 ብር ይዋርዱ · በየዙሩ ትልቅ ሽልማት ያሸንፉ።',
     btn_start:            'ጨዋታ ጀምር →',
     btn_connecting:       '⏳ በማገናኘት ላይ…',
     btn_retry:            'እንደገና ሞክር →',
@@ -2866,21 +2866,21 @@ const TRANSLATIONS = {
     reg_phone_label:      'ስልክ ቁጥር',
     reg_phone_ph:         '09XXXXXXXX',
     reg_phone_hint:       'ግዴታ · ከቴሌግራም ለማጋራት 📲 ይጫኑ',
-    btn_create:           'ፕሮፋይል ፍጠር & ተጫወት',
-    reg_footer:           'ስም: 5–10 ፊደል · ክፍተት አይቻልም',
+    btn_create:           'መለያ ፍጠር & ጫወት',
+    reg_footer:           'ስም: 2–20 ፊደል · ክፍተት የለም',
 
     // ── Nav ──
-    nav_play:             'ተጫወት',
-    nav_deposit:          'ብር አስገባ',
-    nav_withdraw:         'ብር አውጣ',
-    nav_friends:          'ጓደኞች ጋብዝ',
-    nav_leaderboard:      'የመሪዎች ደረጃ',
-    nav_history:          'የጨዋታ ታሪክ',
+    nav_play:             'ጫወት',
+    nav_deposit:          'አስቀምጥ',
+    nav_withdraw:         'አውጣ',
+    nav_friends:          'ጓደኞች',
+    nav_leaderboard:      'ደረጃ',
+    nav_history:          'ታሪክ',
     nav_admin:            'አስተዳዳሪ',
 
     // ── Lobby ──
-    lobby_bet_title:      '🎯 መደብ ይምረጡ',
-    lobby_waiting:        'ጠብቅ',
+    lobby_bet_title:      '🎯 ዋጋ ይምረጡ',
+    lobby_waiting:        'እየጠበቀ',
     lobby_open_rooms:     'ክፍት ጨዋታዎች',
     lobby_join:           'ግባ',
     lobby_pot:            'ድምር',
@@ -2893,8 +2893,8 @@ const TRANSLATIONS = {
     picker_nums:          'ቁጥሮች 1–100',
     picker_card1:         'ካርድ 1 ዕድለኛ ቁጥር',
     picker_card2:         'ካርድ 2 ዕድለኛ ቁጥር',
-    picker_dual_title:    '🃏 2ኛ ካርድ ምረጥ',
-    picker_dual_sub:      'ደብል ካርድ · ደብል እድል!',
+    picker_dual_title:    '🃏 2ኛ ካርድ አክል',
+    picker_dual_sub:      'ድርብ ዋጋ · ድርብ እድል!',
     btn_preview:          'ካርድ ይመልከቱ →',
     btn_back_lobby:       '← ወደ ሎቢ ተመለስ',
 
@@ -2912,13 +2912,13 @@ const TRANSLATIONS = {
     game_countdown_msg:   '✅ ቆጠራ ጀምሯል! ዝግጁ ሁን…',
     game_starts_in:       'ይጀምራል',
     game_called:          'ተጠርቷል',
-    btn_leave:            'ከጨዋታው ውጣ',
-    btn_forfeit:          'ፎርፌ',
+    btn_leave:            'ጨዋታ ለቀቅ',
+    btn_forfeit:          'አስረክብ',
     btn_bingo:            '🎉 ቢንጎ!',
     game_players:         (n) => `${n} ተጫዋች${n !== 1 ? 'ዎች' : ''}`,
 
     // ── Status labels ──
-    status_waiting:       'በመጠበቅ ላይ',
+    status_waiting:       'እየጠበቀ',
     status_countdown:     'ቆጠራ ⏱',
     status_active:        'ቀጥታ 🔴',
     status_finished:      'ተጠናቋል',
@@ -2931,38 +2931,38 @@ const TRANSLATIONS = {
     result_win_title:     'አሸነፉ!',
     result_win_sub:       'ሽልማቱ ወደ ዋሌትዎ ተጨምሯል።',
     result_lose_title:    'ጨዋታ ተጠናቋል',
-    result_lose_sub:      'እንደገና ይሞክሩ!',
-    result_kick_title:    'ከጨዋታው ወጡ!',
-    result_kick_msg:      'የተሳሳተ ቢንጎ — መደብዎ ተበልቷል።',
+    result_lose_sub:      'ሌላ ጊዜ ይሞክሩ!',
+    result_kick_title:    'ተወገዱ!',
+    result_kick_msg:      'የተሳሳተ ቢንጎ — ዋጋዎ ተወርሷል።',
     result_last_title:    'አሸነፉ!',
-    result_last_msg:      'ብቻዎን ቀሩ — ሽልማቱን ሁሉ አሸነፉ!',
+    result_last_msg:      'ብቻዎ ቀሩ — ድምሩን ሁሉ አሸነፉ!',
     result_last_sub:      'ሽልማቱ ወደ ዋሌትዎ ተጨምሯል።',
-    result_forfeit_title: 'ፎርፌ',
-    result_forfeit_sub:   'ጨዋታ ሳይጠናቀቅ ስለለቀቁ።',
-    result_forfeit_note:  'መደብዎ ተበልቷል። እንደገና ይሞክሩ!',
+    result_forfeit_title: 'አስረከቡ',
+    result_forfeit_sub:   'ጨዋታ ሳይጠናቀቅ ለቀቁ።',
+    result_forfeit_note:  'ዋጋዎ ተወርሷል። ሌላ ጊዜ ይሞክሩ!',
     result_winner:        (name) => `${name} ቢንጎ አሸነፈ!`,
-    btn_play_again:       '▶ እንደገና ተጫወት',
+    btn_play_again:       '▶ እንደገና ጫወት',
     btn_change_lucky:     '🔢 ዕድለኛ ቁጥር ቀይር',
 
     // ── Deposit ──
-    dep_title:            '💰 ገንዘብ አስገባ',
+    dep_title:            '💰 ገንዘብ አስቀምጥ',
     dep_send_to:          '📱 ክፍያ ይላኩ ወደ:',
     dep_name_ph:          'ለምሳሌ አበበ ከበደ',
     dep_amount_ph:        'ቢያንስ 50 ብር',
     dep_ref_ph:           'ለምሳሌ TXN123456',
     btn_submit_dep:       'የዲፖዚት ጥያቄ ላክ',
-    dep_success:          '✅ የዲፖዚት ጥያቄ ተልኳል! እንደተረጋገጠ ወደ ዋሌት ይጨምራል።',
+    dep_success:          '✅ የዲፖዚት ጥያቄ ተልኳል! በ1 ሰዓት ይጨምራል።',
 
     // ── Withdraw ──
     wd_title:             '💳 ገንዘብ አውጣ',
-    wd_rules:             '• ቢያንስ: 200 ብር\n• ቢያንስ 50+ ብር ተቀማጭ ማድረግ አለ\n• ጠቅላላ 15 ጨዋታ መጫወት አለቦት\n• ዛሬ 5 ጨዋታ መጫወት አለቦት\n• በቀን 1 ጊዜ ብቻ ነው ወጪ\n• ከወጪ በኋላ ≥ 50 ብር መቅረት \n• የሚወስደው ጊዜ: ~1 ሰዓት',
-    wd_phone_ph:          'አካውንት / ስልክ ቁጥር',
+    wd_rules:             '• ቢያንስ: 200 ብር\n• 50+ ብር አስቀምጠው መሆን አለበት\n• ጠቅላላ 15 ጨዋታ\n• ዛሬ 5 ጨዋታ\n• በቀን 1 ጊዜ\n• ከወሰዱ በኋላ ≥ 50 ብር\n• ሂደት: ~1 ሰዓት',
+    wd_phone_ph:          'መለያ / ስልክ ቁጥር',
     wd_name_ph:           'ሙሉ ስም',
     wd_amount_ph:         'ቢያንስ 200 ብር',
     btn_cbe:              '🏦 CBE',
     btn_telebirr:         '📱 ቴሌብር',
     btn_submit_wd:        'የወጪ ጥያቄ ላክ',
-    wd_success:           '✅ የወጪ ጥያቄ ተልኳል! በ~1 ሰዓት ውስጥ ይላካል።',
+    wd_success:           '✅ የወጪ ጥያቄ ተልኳል! በ~1 ሰዓት ይሰራል።',
 
     // ── Friends ──
     friends_title:        '📨 ጓደኞች ጋብዝ',
@@ -2975,13 +2975,13 @@ const TRANSLATIONS = {
     btn_share:            '📤 አጋራ',
 
     // ── Leaderboard ──
-    lb_title:             '🏆 የመሪዎች ዝርዝር',
+    lb_title:             '🏆 የደረጃ ሰሌዳ',
 
     // ── History ──
     hist_title:           '📜 የጨዋታ ታሪክ',
     hist_win:             'አሸነፈ',
-    hist_loss:            'ተሸነፈ',
-    hist_left:            'ፎርፌ',
+    hist_loss:            'ሸነፈ',
+    hist_left:            'ለቀቀ',
 
     // ── Profile ──
     profile_stats:        'ስታቲስቲክስ',
@@ -2994,33 +2994,33 @@ const TRANSLATIONS = {
 
     // ── Leave modal ──
     leave_title:          'ጨዋታ ትለቃለህ?',
-    leave_forfeit_warn:   '⚠️ ጨዋታ ቀጥሏል — ከለቀቁ መደብዎ ይበላል!',
-    leave_confirm:        'ልቀቅ',
-    leave_cancel:         'ይቅር',
+    leave_forfeit_warn:   '⚠️ ጨዋታ ቀጥሏል — ከለቀቁ ዋጋዎ ይወረሳል!',
+    leave_confirm:        'ለቀቅ',
+    leave_cancel:         'ሰርዝ',
 
     // ── Toasts ──
-    toast_reconnected:    'ወደ ጨዋታ ለማስገባት ሙከራ ላይ!',
+    toast_reconnected:    'ወደ ጨዋታ ተሳሰርን!',
     toast_open_tg:        'ስልክ ቁጥር ለማጋራት ቴሌግራምን ክፈቱ',
     toast_phone_filled:   'ስልክ ቁጥር ከቴሌግራም ተሞልቷል!',
     toast_copied:         (label) => `${label} ተቀድቷል!`,
-    toast_welcome:        'እንኳን ደህና መጣህ! ፕሮፋይል ዝግጁ ነው 🎁',
-    toast_leave_first:    'ሜኑ ለመክፈት ጨዋታ ይልቀቁ።',
-    toast_select_bet:     'ቅድሚያ መደብ ይምረጡ',
+    toast_welcome:        'እንኳን ደህና መጣህ! መለያዎ ዝግጁ ነው 🎁',
+    toast_leave_first:    'ምናሌ ለመክፈት ጨዋታ ይልቀቁ።',
+    toast_select_bet:     'ቅድሚያ ዋጋ ይምረጡ',
     toast_no_balance:     'ቀሪ ገንዘብ አይበቃም',
     toast_pick_num:       'ቅድሚያ ዕድለኛ ቁጥር ይምረጡ!',
     toast_num_taken:      'ቁጥሩ ተወስዷል — ሌላ ይምረጡ',
     toast_wrong_bingo:    '❌ የተሳሳተ ቢንጎ! ከጨዋታ ወጥተዋል።',
-    toast_need_etb:       (amt) => `ይህን መድብ ለመጫወት ቢያንስ ${amt} ብር ያስፈልጋል`,
-    toast_enter_name:     'የላኩበት ስምዎን ያስገቡ',
-    toast_min_deposit:    'መጀመሪያ ቢያንስ 50 ብር ያስገቡ',
-    toast_enter_ref:      'ሪፈረንስ/SMS ኮድ ያስገቡ',
+    toast_need_etb:       (amt) => `ይህን ዋጋ ለመጫወት ቢያንስ ${amt} ብር ያስፈልጋል`,
+    toast_enter_name:     'በክፍያ መለያዎ ላይ ያለውን ስምዎን ያስገቡ',
+    toast_min_deposit:    'ቢያንስ 50 ብር ይዋርዱ',
+    toast_enter_ref:      'የሂደት ማጣቀሻ/SMS ኮድ ያስገቡ',
     toast_select_bank:    'CBE ወይም ቴሌብር ይምረጡ',
-    toast_enter_phone:    'የስልክ/አካውንት ቁጥር ያስገቡ',
-    toast_enter_acct:     'የባንክ አካውንት ስም ያስገቡ',
+    toast_enter_phone:    'የስልክ/መለያ ቁጥር ያስገቡ',
+    toast_enter_acct:     'የባንክ ስም ያስገቡ',
     toast_min_wd:         (min) => `ቢያንስ ${min} ብር ማውጣት ይቻላል`,
     toast_no_friends:     'ጓደኞችን መጫን አልተቻለም',
-    toast_username_short: 'ስም ቢያንስ 5 ፊደል ያስፈልጋል',
-    toast_username_long:  'ስም ከ10 ፊደል አይብለጥ',
+    toast_username_short: 'ስም ቢያንስ 2 ፊደል ያስፈልጋል',
+    toast_username_long:  'ስም ከ20 ፊደል አይበልጥ',
     toast_username_space: 'ስሙ ላይ ክፍተት አይፈቀድም',
     toast_phone_req:      'ስልክ ቁጥር ያስፈልጋል',
     toast_phone_invalid:  'ትክክለኛ ስልክ ቁጥር ያስገቡ',
