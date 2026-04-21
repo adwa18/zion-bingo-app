@@ -821,6 +821,7 @@ body::before {
     </div>
     <div class="header-title" id="header-title">JOKER BINGO</div>
     <div class="header-user" id="header-user"></div>
+    <button id="lang-btn" onclick="toggleLang()" style="background:none;border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;color:var(--text2);cursor:pointer;flex-shrink:0;white-space:nowrap">አማርኛ</button>
   </div>
 
   <!-- NAV OVERLAY + DRAWER -->
@@ -877,16 +878,16 @@ body::before {
       </div>
       <div class="card slide-up">
         <div class="card-title">👤 New Player</div>
-        <div class="bonus-badge">🎁 Welcome Bonus + 10% on First Deposit!</div>
-        <label class="label" style="margin-top:10px">Choose Your Username</label>
+        <div class="bonus-badge" id="reg-bonus-badge">🎁 Welcome Bonus + 10% on First Deposit!</div>
+        <label class="label" id="reg-username-label" style="margin-top:10px">Choose Your Username</label>
         <input class="input" id="input-username" type="text" placeholder="e.g. BingoKing99" maxlength="20" autocomplete="off">
-        <label class="label" style="margin-top:10px">Phone Number <span style="color:var(--red)">*</span></label>
+        <label class="label" id="reg-phone-label" style="margin-top:10px">Phone Number <span style="color:var(--red)">*</span></label>
         <div style="display:flex;gap:8px;align-items:flex-start">
           <input class="input" id="input-phone" type="tel" placeholder="09XXXXXXXX" autocomplete="tel" style="margin-bottom:0;flex:1">
           <button class="btn btn-ghost btn-sm" style="flex-shrink:0;padding:11px 10px;margin-top:0" onclick="requestTgPhone()" title="Share Telegram phone">📲</button>
         </div>
         <div style="font-size:11px;color:var(--text3);margin-bottom:10px;margin-top:4px">Required · tap 📲 to share from Telegram</div>
-        <button class="btn btn-gold" onclick="submitRegister()">CREATE ACCOUNT & PLAY</button>
+        <button class="btn btn-gold" id="btn-create-acct" onclick="submitRegister()">CREATE ACCOUNT & PLAY</button>
         <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:10px">Username: 2–20 chars · No spaces</div>
       </div>
     </div>
@@ -894,7 +895,7 @@ body::before {
     <!-- ── LOBBY ── -->
     <div class="screen" id="screen-lobby">
       <div class="card card-gold fade-in">
-        <div class="card-title">🎯 Choose Your Bet</div>
+        <div class="card-title" id="lobby-bet-title">🎯 Choose Your Bet</div>
         <div class="bet-grid" id="bet-grid">
           <div class="bet-card" data-amount="10" onclick="selectBet(10,this)">
             <div class="bet-amount">10</div>
@@ -1058,7 +1059,7 @@ body::before {
     <!-- ── LEADERBOARD ── -->
     <div class="screen" id="screen-leaderboard">
       <div class="card card-gold fade-in">
-        <div class="card-title">🏆 Leaderboard</div>
+        <div class="card-title" id="lb-title">🏆 Leaderboard</div>
         <div id="leaderboard-list"></div>
       </div>
     </div>
@@ -1074,10 +1075,10 @@ body::before {
     <!-- ── DEPOSIT (with error box) ── -->
     <div class="screen" id="screen-deposit">
       <div class="card card-gold fade-in">
-        <div class="card-title">💰 Deposit Funds</div>
+        <div class="card-title" id="dep-title">💰 Deposit Funds</div>
         <!-- Payment info box -->
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:2">
-          📱 <b>Send payment to:</b><br>
+          📱 <b id="dep-send-to">Send payment to:</b><br>
           CBE: <span id="dep-cbe" style="font-family:monospace;color:var(--gold);cursor:pointer;font-weight:700" onclick="copyText('1000532982565','CBE number')">1000532982565</span> (Tewodros Ephrem) <span style="font-size:10px;color:var(--text3)" onclick="copyText('1000532982565','CBE number')">📋</span><br>
           Telebirr: <span id="dep-tel" style="font-family:monospace;color:var(--gold);cursor:pointer;font-weight:700" onclick="copyText('0913252238','Telebirr number')">0913252238</span> (Tewodros Ephrem) <span style="font-size:10px;color:var(--text3)" onclick="copyText('0913252238','Telebirr number')">📋</span><br>
           Reference: <span id="dep-ref-code" style="font-family:monospace;color:var(--green);font-weight:700;cursor:pointer" onclick="copyText(document.getElementById('dep-ref-code').textContent,'Reference')">JB-…</span> <span style="font-size:10px;color:var(--text3)" onclick="copyText(document.getElementById('dep-ref-code').textContent,'Reference')">📋</span>
@@ -1097,7 +1098,7 @@ body::before {
     <!-- ── WITHDRAW (with error box and rules) ── -->
     <div class="screen" id="screen-withdraw">
       <div class="card card-gold fade-in">
-        <div class="card-title">💳 Withdraw Funds</div>
+        <div class="card-title" id="wd-title">💳 Withdraw Funds</div>
         <div style="background:var(--surface2);border-radius:10px;padding:10px;margin-bottom:12px;font-size:11px;color:var(--text2);line-height:1.6">
           <strong style="color:var(--amber)">Withdrawal Rules</strong><br>
           • Minimum: <strong>200 ETB</strong><br>
@@ -1129,7 +1130,7 @@ body::before {
     <!-- ── FRIENDS (with progress bar) ── -->
     <div class="screen" id="screen-friends">
       <div class="card card-gold fade-in">
-        <div class="card-title">📨 Invite Friends</div>
+        <div class="card-title" id="friends-title">📨 Invite Friends</div>
         <div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:14px;text-align:center">
           <div style="font-size:28px">🎁</div>
           <div style="font-size:13px;font-weight:700;color:var(--text);margin:6px 0">Earn 20 ETB every 10 friends!</div>
@@ -1272,8 +1273,8 @@ body::before {
     <div style="font-size:13px;color:var(--text2);margin-bottom:8px;line-height:1.5">Your spot will be lost.</div>
     <div id="leave-forfeit-warn" style="display:none;font-size:12px;color:var(--red);margin-bottom:12px;font-weight:700">⚠️ Game started — leaving forfeits your bet!</div>
     <div style="display:flex;gap:10px">
-      <button class="btn btn-ghost" style="flex:1;padding:10px" onclick="doLeave(false)">Cancel</button>
-      <button class="btn" style="flex:1;padding:10px;background:var(--red);color:#fff;border-color:var(--red)" onclick="doLeave(true)">Leave</button>
+      <button class="btn btn-ghost" style="flex:1;padding:10px" id="leave-cancel-btn" onclick="doLeave(false)">Cancel</button>
+      <button class="btn" style="flex:1;padding:10px;background:var(--red);color:#fff;border-color:var(--red)" id="leave-confirm-btn" onclick="doLeave(true)">Leave</button>
     </div>
   </div>
 </div>
@@ -1322,7 +1323,6 @@ const S = {
   gamePolling:  null,
   lobbyPolling: null,
   prevCalledLen:0,
-  prevPlayerCount: 0,
 };
 
 /* ══════════════════════════════════════════════════════════
@@ -1371,95 +1371,25 @@ function playSound(type) {
   if (!soundEnabled) return;
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
-
-    const osc = (freq, type='sine', start=0, dur=0.2, vol=0.3, ramp=0.001) => {
-      const o = ctx.createOscillator(), g = ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.type = type; o.frequency.setValueAtTime(freq, ctx.currentTime + start);
-      g.gain.setValueAtTime(vol, ctx.currentTime + start);
-      g.gain.exponentialRampToValueAtTime(ramp, ctx.currentTime + start + dur);
-      o.start(ctx.currentTime + start); o.stop(ctx.currentTime + start + dur);
-    };
-
-    const noise = (start=0, dur=0.1, vol=0.15) => {
-      const buf = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
-      const data = buf.getChannelData(0);
-      for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
-      const src = ctx.createBufferSource(), g = ctx.createGain();
-      const filter = ctx.createBiquadFilter();
-      filter.type = 'bandpass'; filter.frequency.value = 800;
-      src.buffer = buf; src.connect(filter); filter.connect(g); g.connect(ctx.destination);
-      g.gain.setValueAtTime(vol, ctx.currentTime + start);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
-      src.start(ctx.currentTime + start); src.stop(ctx.currentTime + start + dur);
-    };
-
     if (type === 'sound-call') {
-      // Number called — crisp double-blip
-      osc(880, 'sine', 0,    0.07, 0.2);
-      osc(660, 'sine', 0.09, 0.07, 0.15);
-
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine'; osc.frequency.setValueAtTime(660, ctx.currentTime);
+      gain.gain.setValueAtTime(0.25, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.18);
     } else if (type === 'sound-bingo') {
-      // BINGO claimed — epic ascending fanfare
-      osc(523, 'sine', 0,    0.18, 0.35);
-      osc(659, 'sine', 0.15, 0.18, 0.35);
-      osc(784, 'sine', 0.30, 0.18, 0.35);
-      osc(1047,'sine', 0.45, 0.35, 0.4);
-      osc(1319,'sine', 0.60, 0.5,  0.45);
-      // Shimmer on top
-      osc(2093,'triangle', 0.62, 0.4, 0.12);
-
-    } else if (type === 'win') {
-      // Win screen — triumphant chord + sparkle
-      [523, 659, 784, 1047].forEach((f, i) => osc(f, 'sine', i*0.06, 0.7, 0.25));
-      osc(1568, 'triangle', 0.3, 0.5, 0.15);
-      osc(2093, 'triangle', 0.45, 0.4, 0.1);
-      noise(0.28, 0.08, 0.08); // sparkle noise burst
-
-    } else if (type === 'lose') {
-      // Loss — descending sad trombone-ish
-      const o = ctx.createOscillator(), g = ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.type = 'sawtooth';
-      o.frequency.setValueAtTime(330, ctx.currentTime);
-      o.frequency.exponentialRampToValueAtTime(180, ctx.currentTime + 0.5);
-      g.gain.setValueAtTime(0.2, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
-      o.start(); o.stop(ctx.currentTime + 0.6);
-      osc(220, 'sine', 0.45, 0.4, 0.12);
-
-    } else if (type === 'btn') {
-      // Button press — satisfying soft click
-      noise(0, 0.04, 0.25);
-      osc(1200, 'sine', 0, 0.05, 0.08);
-
-    } else if (type === 'menu') {
-      // Menu open — soft whoosh + high chime
-      noise(0, 0.12, 0.12);
-      osc(1800, 'sine', 0.05, 0.15, 0.1);
-      osc(2400, 'triangle', 0.1, 0.1, 0.06);
-
-    } else if (type === 'countdown') {
-      // Countdown tick — deep mechanical click
-      osc(120, 'square', 0, 0.06, 0.3);
-      noise(0, 0.03, 0.2);
-
-    } else if (type === 'countdown-final') {
-      // Last 5 seconds — urgent high tick
-      osc(880,  'square', 0,    0.05, 0.3);
-      osc(1320, 'sine',   0.04, 0.05, 0.2);
-
-    } else if (type === 'join') {
-      // Player joined — friendly pop
-      osc(440, 'sine', 0,    0.1, 0.2);
-      osc(660, 'sine', 0.08, 0.12, 0.2);
-
-    } else if (type === 'forfeit') {
-      // Forfeit — short harsh buzz
-      osc(160, 'sawtooth', 0, 0.18, 0.25);
-      osc(140, 'square',   0.05, 0.12, 0.15);
+      // Three-note win fanfare
+      [880, 1100, 1320].forEach((freq, i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type = 'sine'; o.frequency.value = freq;
+        const t = ctx.currentTime + i * 0.2;
+        g.gain.setValueAtTime(0.3, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+        o.start(t); o.stop(t + 0.28);
+      });
     }
-
   } catch(e) {}
 }
 function toggleSound() {
@@ -1492,7 +1422,7 @@ async function attemptReconnect() {
       S.myMarked = gm.my_player.marked_cells;
       showScreen('screen-game');
       startGameScreen();
-      toast('Reconnected to game!', 'success');
+      toast(t('toast_reconnected'), 'success');
       return true;
     }
   } catch(e) {}
@@ -1514,10 +1444,10 @@ window.addEventListener('DOMContentLoaded', async () => {
   const tgRaw = window.Telegram?.WebApp?.initDataUnsafe?.user;
   if (tgRaw) {
     S.tgUser = tgRaw;
-    document.getElementById('welcome-greeting').textContent = `Hello, ${tgRaw.first_name}! 👋`;
+    document.getElementById('welcome-greeting').textContent = t('welcome_greeting', tgRaw.first_name);
   } else {
     S.tgUser = { id: 'dev_' + Date.now(), username: 'DevPlayer', first_name: 'Dev' };
-    document.getElementById('welcome-greeting').textContent = 'Welcome to Joker Bingo! 👋';
+    document.getElementById('welcome-greeting').textContent = t('welcome_greeting', 'Player');
   }
   const saved = localStorage.getItem('bb_theme');
   if (saved === 'light') applyTheme(true, false);
@@ -1540,10 +1470,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
   } catch (_) {}
   showScreen('screen-welcome');
-  // ─── GLOBAL BUTTON SOUND ──────────────────────────────
-  document.querySelectorAll('.btn, .nav-btn, .bet-tile, .num-cell').forEach(el => {
-    el.addEventListener('pointerdown', () => playSound('btn'));
-  });
 });
 
 /* ══════════════════════════════════════════════════════════
@@ -1582,24 +1508,24 @@ async function handleWelcomeClick() {
 
 function requestTgPhone() {
   if (!window.Telegram?.WebApp?.requestContact) {
-    toast('Open in Telegram to share phone', 'info'); return;
+    toast(t('toast_open_tg'), 'info'); return;
   }
   window.Telegram.WebApp.requestContact((ok, contact) => {
     if (!ok || !contact?.contact?.phone_number) return;
     const el = document.getElementById('input-phone');
-    if (el) { el.value = contact.contact.phone_number; toast('Phone filled from Telegram!', 'success'); }
+    if (el) { el.value = contact.contact.phone_number; toast(t('toast_phone_filled'), 'success'); }
   });
 }
 
 async function submitRegister() {
   const username = document.getElementById('input-username').value.trim();
   const phone    = document.getElementById('input-phone')?.value.trim() || '';
-  if (!username || username.length < 2) { toast('Username must be 2+ characters', 'error'); return; }
-  if (username.length > 20) { toast('Username too long (max 20)', 'error'); return; }
-  if (/\s/.test(username)) { toast('No spaces in username', 'error'); return; }
-  if (!phone) { toast('Phone number is required', 'error'); return; }
+  if (!username || username.length < 2) { toast(t('toast_username_short'), 'error'); return; }
+  if (username.length > 20) { toast(t('toast_username_long'), 'error'); return; }
+  if (/\s/.test(username)) { toast(t('toast_username_space'), 'error'); return; }
+  if (!phone) { toast(t('toast_phone_req'), 'error'); return; }
   const phoneClean = phone.replace(/[\s\-]/g, '');
-  if (!/^(\+?251|0)[0-9]{9}$/.test(phoneClean)) { toast('Enter a valid phone number', 'error'); return; }
+  if (!/^(\+?251|0)[0-9]{9}$/.test(phoneClean)) { toast(t('toast_phone_invalid'), 'error'); return; }
   try {
     const res = await api('POST', '/api/register', {
       tg_id: String(S.tgUser.id),
@@ -1608,7 +1534,7 @@ async function submitRegister() {
     });
     S.user = res.user;
     onLoggedIn();
-    toast('Welcome! Your account is ready 🎁', 'success');
+    toast(t('toast_welcome'), 'success');
   } catch (e) {
     toast(e.message, 'error');
   }
@@ -1661,14 +1587,14 @@ function renderNav() {
   const u = S.user;
   const items = [
     { icon:'🎮', label:'Play',           screen:'screen-lobby',       fn:'goToLobby' },
-    { icon:'💰', label:'Deposit',        screen:'screen-deposit',     fn:'loadDeposit' },
-    { icon:'💳', label:'Withdraw',       screen:'screen-withdraw',    fn:'loadWithdraw' },
-    { icon:'📨', label:'Invite Friends', screen:'screen-friends',     fn:'loadFriends' },
-    { icon:'🏆', label:'Leaderboard',    screen:'screen-leaderboard', fn:'loadLeaderboard' },
-    { icon:'📜', label:'History',        screen:'screen-history',     fn:'loadHistory' },
+    { icon:'💰', label:t('nav_deposit'),        screen:'screen-deposit',     fn:'loadDeposit' },
+    { icon:'💳', label:t('nav_withdraw'),       screen:'screen-withdraw',    fn:'loadWithdraw' },
+    { icon:'📨', label:t('nav_friends'), screen:'screen-friends',     fn:'loadFriends' },
+    { icon:'🏆', label:t('nav_leaderboard'),    screen:'screen-leaderboard', fn:'loadLeaderboard' },
+    { icon:'📜', label:t('nav_history'),        screen:'screen-history',     fn:'loadHistory' },
     { icon:'📖', label:'Instructions',   screen:'screen-instructions', fn:null },
   ];
-  if (u?.is_admin) items.push({ icon:'⚙️', label:'Admin Panel', screen:'screen-admin', fn:'loadAdmin' });
+  if (u?.is_admin) items.push({ icon:'⚙️', label:t('nav_admin'), screen:'screen-admin', fn:'loadAdmin' });
   
   // Also add a sound toggle to the profile later; we'll add it as a separate element in profile screen
   document.getElementById('nav-items').innerHTML = items.map(i =>
@@ -1698,7 +1624,7 @@ function navTo(screen, fn) {
 
 /* ══ DEPOSIT / WITHDRAW / FRIENDS ══════════════════════════════════════ */
 function copyText(txt, label) {
-  if (navigator.clipboard) navigator.clipboard.writeText(txt).then(()=>toast(`${label} copied!`,'success'));
+  if (navigator.clipboard) navigator.clipboard.writeText(txt).then(()=>toast(t('toast_copied', label),'success'));
   else toast(txt,'info');
 }
 function loadDeposit() {
@@ -1723,13 +1649,13 @@ async function submitDeposit() {
   const name = (document.getElementById('dep-sender-name')?.value||'').trim();
   const amt  = (document.getElementById('dep-amount')?.value||'').trim();
   const ref  = (document.getElementById('dep-ref')?.value||'').trim();
-  if (!name) { toast('Enter your name as it appears on the payment','error'); return; }
-  if (!amt||parseFloat(amt)<10) { toast('Min deposit is 10 ETB','error'); return; }
-  if (!ref)  { toast('Enter transaction reference/SMS code','error'); return; }
+  if (!name) { toast(t('toast_enter_name'),'error'); return; }
+  if (!amt||parseFloat(amt)<10) { toast(t('toast_min_deposit'),'error'); return; }
+  if (!ref)  { toast(t('toast_enter_ref'),'error'); return; }
   showLoading(true);
   try {
     await api('POST','/api/deposit-request',{amount:parseFloat(amt),reference:ref,sender_name:name});
-    toast('✅ Deposit request sent! Credited within 1 hour.','success');
+    toast(t('dep_success'),'success');
     document.getElementById('dep-sender-name').value='';
     document.getElementById('dep-amount').value='';
     document.getElementById('dep-ref').value='';
@@ -1746,14 +1672,14 @@ async function submitWithdraw() {
   const phone = (document.getElementById('wd-phone')?.value||'').trim();
   const aname = (document.getElementById('wd-account-name')?.value||'').trim();
   const amt   = parseFloat((document.getElementById('wd-amount')?.value||'').trim());
-  if (!bank)  { toast('Select payment method (CBE or Telebirr)','error'); return; }
-  if (!phone) { toast('Enter account/phone number','error'); return; }
-  if (!aname) { toast('Enter account holder name','error'); return; }
-  if (isNaN(amt) || amt < MIN_WITHDRAW) { toast(`Minimum withdrawal is ${MIN_WITHDRAW} ETB`,'error'); return; }
+  if (!bank)  { toast(t('toast_select_bank'),'error'); return; }
+  if (!phone) { toast(t('toast_enter_phone'),'error'); return; }
+  if (!aname) { toast(t('toast_enter_acct'),'error'); return; }
+  if (isNaN(amt) || amt < MIN_WITHDRAW) { toast(t('toast_min_wd', MIN_WITHDRAW),'error'); return; }
   showLoading(true);
   try {
     await api('POST','/api/withdraw-request',{amount:amt,phone,bank,account_name:aname});
-    toast('✅ Withdrawal request sent! Processed within ~1 hour.','success');
+    toast(t('wd_success'),'success');
     ['wd-bank','wd-phone','wd-account-name','wd-amount'].forEach(id=>{
       const el=document.getElementById(id); if(el)el.value='';
     });
@@ -1787,7 +1713,7 @@ async function loadFriends() {
     if (fill) fill.style.width = `${progress}%`;
     const msg = document.getElementById('ref-next-message');
     if (msg) msg.textContent = `${per - (rc % per)} more referrals until +${stats.bonus_amount} ETB!`;
-  } catch(e){ toast('Could not load friends','error'); }
+  } catch(e){ toast(t('toast_no_friends'),'error'); }
 }
 function copyReferralLink() {
   const t=document.getElementById('friends-link')?.textContent||'';
@@ -1812,10 +1738,9 @@ function goToLobby() {
 }
 function openNav()  {
   if (S.currentGameId) {
-    toast('Leave or forfeit the game first to access the menu.', 'error');
+    toast(t('toast_leave_first'), 'error');
     return;
   }
-  playSound('menu');
   document.getElementById('nav-drawer').classList.add('open');
   document.getElementById('nav-overlay').classList.add('open');
 }
@@ -1851,7 +1776,7 @@ function selectBet(amount, el) {
   S.selectedBet = amount;
 
   if (S.user?.balance < amount) {
-    toast(`You need at least ${amount} ETB to play this bet`, 'error');
+    toast(t('toast_need_etb', amount), 'error');
     el.classList.remove('selected');
     S.selectedBet = null;
     return;
@@ -1889,12 +1814,12 @@ async function loadGamesForBet(amount) {
 }
 
 function statusLabel(s) {
-  return { waiting:'Waiting', countdown:'Countdown ⏱', active:'LIVE 🔴', finished:'Finished' }[s] || s;
+  return { waiting:t('status_waiting'), countdown:t('status_countdown'), active:t('status_active'), finished:t('status_finished') }[s] || s;
 }
 
 async function createAndJoin() {
-  if (!S.selectedBet) { toast('Select a bet amount first', 'error'); return; }
-  if (S.user?.balance < S.selectedBet) { toast('Insufficient balance', 'error'); return; }
+  if (!S.selectedBet) { toast(t('toast_select_bet'), 'error'); return; }
+  if (S.user?.balance < S.selectedBet) { toast(t('toast_no_balance'), 'error'); return; }
   showLoading(true);
   try {
     const res = await api('POST', '/api/games', { bet_amount: S.selectedBet });
@@ -1904,7 +1829,7 @@ async function createAndJoin() {
 }
 
 async function joinExistingGame(gameId) {
-  if (S.user?.balance < S.selectedBet) { toast('Insufficient balance', 'error'); return; }
+  if (S.user?.balance < S.selectedBet) { toast(t('toast_no_balance'), 'error'); return; }
   showLoading(true);
   try {
     await enterPickerForGame(gameId);
@@ -1951,7 +1876,7 @@ function _updatePickerBar(gm) {
           stopPickerPoll();
           S.currentGameId = null;
           showScreen('screen-lobby'); startLobbyPolling();
-          toast('Game ended — please select another lobby', 'error');
+          toast(t('toast_game_ended'), 'error');
         }
       }, 1000);
     }
@@ -1961,7 +1886,7 @@ function _updatePickerBar(gm) {
     if (_pickerWaitTimer) { clearInterval(_pickerWaitTimer); _pickerWaitTimer = null; }
     api('POST', '/api/games', { bet_amount: S.selectedBet }).then(room => {
       S.currentGameId = room.id;
-      toast('Game over — tap Proceed to join the next game!', 'success');
+      toast(t('toast_game_over'), 'success');
     }).catch(() => {});
   } else {
     if (previewBtn) { previewBtn.disabled = false; previewBtn.style.opacity = '1'; }
@@ -2099,7 +2024,7 @@ function pickNumber(n, el) {
 }
 
 async function goToPreview() {
-  if (!S.pickedNumber) { toast('Pick a lucky number first!', 'error'); return; }
+  if (!S.pickedNumber) { toast(t('toast_pick_num'), 'error'); return; }
   stopPickerPoll();
   try {
     const r1 = await api('GET', '/api/preview-card/' + S.pickedNumber);
@@ -2112,7 +2037,7 @@ async function goToPreview() {
 function renderPreviewBoth() {
   const card = S.previewCard || S.myCard;
   const n = S.pickedNumber;
-  document.getElementById('preview-title').textContent = '🃏 Your BINGO Card';
+  document.getElementById('preview-title').textContent = t('preview_title_single');
   renderOnePreviewCard('preview-card-grid', card, n);
   document.getElementById('preview-proceed-msg').textContent =
     `Card generated from number ${n||'?'}. Proceed to enter the game!`;
@@ -2202,15 +2127,6 @@ async function pollGame() {
   if (!S.currentGameId) return;
   try {
     const gm = await api('GET', '/api/games/' + S.currentGameId);
-    
-    // ─── TRACK PLAYER COUNT FOR JOIN SOUND ─────────────────
-    if (typeof S.prevPlayerCount === 'undefined') S.prevPlayerCount = 0;
-    if (gm.player_count > S.prevPlayerCount) {
-      playSound('join');
-    }
-    S.prevPlayerCount = gm.player_count;
-    // ───────────────────────────────────────────────────────
-
     if (gm.my_player) {
       if (!S.myCard && gm.my_player.card) { S.myCard=gm.my_player.card; renderGameCard(); }
       S.myMarked = gm.my_player.marked_cells || [[2,2]];
@@ -2223,15 +2139,15 @@ async function pollGame() {
     }
     const leaveBtn = document.getElementById('leave-btn');
     if (gm.status === 'waiting' || gm.status === 'countdown') {
-      if (leaveBtn) leaveBtn.textContent = 'Leave Game';
+      if (leaveBtn) leaveBtn.textContent = t('btn_leave');
       showPhase('phase-waiting');
-      document.getElementById('game-player-count').textContent = gm.player_count + ' player' + (gm.player_count!==1?'s':'');
+      document.getElementById('game-player-count').textContent = gm.player_count t('game_players', gm.player_count)  //;
       document.getElementById('game-room-label').textContent = gm.id;
       if (gm.status === 'waiting') {
         _stopCountdownTick(); _stopCallTicker();
         _countdownStarted = false; _gameIsActive = false;
         document.getElementById('countdown-display').textContent = formatTime(30);
-        document.getElementById('waiting-status-msg').textContent = '⏳ Waiting for another player to join…';
+        document.getElementById('waiting-status-msg').textContent = t('game_waiting_msg');
         document.getElementById('game-status-chip').innerHTML = '<div class="chip chip-gold">WAITING</div>';
       } else {
         const serverSecs = gm.countdown_remaining ?? 30;
@@ -2239,17 +2155,17 @@ async function pollGame() {
           _startCountdownTick(serverSecs);
         }
         _countdownStarted = true; _gameIsActive = false;
-        document.getElementById('waiting-status-msg').textContent = '✅ Countdown started! Get ready…';
+        document.getElementById('waiting-status-msg').textContent = t('game_countdown_msg');
         document.getElementById('game-status-chip').innerHTML = '<div class="chip chip-green"><span class="dot"></span>COUNTDOWN</div>';
       }
     }
     if (gm.status === 'active') {
-      if (leaveBtn) leaveBtn.textContent = 'Forfeit Game';
+      if (leaveBtn) leaveBtn.textContent = t('btn_forfeit');
       _stopCountdownTick(); _gameIsActive = true;
       showPhase('phase-active');
       const called = gm.called_numbers || [];
       document.getElementById('called-count').textContent = called.length;
-      document.getElementById('active-player-count').textContent = gm.player_count + ' players';
+      document.getElementById('active-player-count').textContent = gm.player_count t('game_players', gm.player_count);
       if (gm.server_time) {
         _clockOffset = gm.server_time * 1000 - Date.now();
       }
@@ -2337,7 +2253,7 @@ async function doClaim(cardId=1) {
     const res = await api('POST', `/api/games/${S.currentGameId}/claim`, { card_id: cardId });
     if (res.kicked) {
       clearTimeout(S.gamePolling);
-      toast('❌ Wrong BINGO! Removed from game.', 'error');
+      toast(t('toast_wrong_bingo'), 'error');
       setTimeout(() => showResult(false, 0, null, true), 1800);
       return;
     }
@@ -2353,8 +2269,8 @@ async function doClaim(cardId=1) {
 }
 
 function showBingoOverlay(prize) {
-  document.getElementById('overlay-prize').textContent = `+${prize.toLocaleString()} ETB PRIZE!`;
-  document.getElementById('overlay-msg').textContent   = 'Congratulations! Winnings added to your wallet.';
+  document.getElementById('overlay-prize').textContent = t('overlay_prize', prize);
+  document.getElementById('overlay-msg').textContent   = t('overlay_msg');
   document.getElementById('bingo-overlay').classList.add('show');
   spawnConfetti();
   setTimeout(hideBingoOverlay, 6000);
@@ -2394,32 +2310,29 @@ function showResult(won, balance, winnerName, kicked=false, forfeited=false, for
   }
   const el = document.getElementById('result-inner');
   if (won) {
-    playSound('win'); 
     el.innerHTML = `<div class="card card-gold win-bg fade-in" style="text-align:center;margin-bottom:12px">
-      <div class="result-icon">🏆</div><div class="result-title" style="color:var(--gold)">YOU WIN!</div>
+      <div class="result-icon">🏆</div><div class="result-title" style="color:var(--gold)">${t('result_win_title')}</div>
       <div class="result-prize">+${(balance||0).toLocaleString()} ETB Balance</div>
-      <div class="result-sub">Winnings added to your wallet.</div></div>`;
+      <div class="result-sub">${t('result_win_sub')}</div></div>`;
   } else {
     if (forfeited) {
-      playSound('forfeit');
       el.innerHTML = `<div class="card lose-bg fade-in" style="text-align:center;margin-bottom:12px">
         <div class="result-icon">🏳️</div>
-        <div class="result-title" style="color:var(--red)">FORFEITED</div>
-        <div style="font-size:15px;font-weight:700;color:var(--text2);margin-bottom:6px">You left during an active game.</div>
+        <div class="result-title" style="color:var(--red)">${t('result_forfeit_title')}</div>
+        <div style="font-size:15px;font-weight:700;color:var(--text2);margin-bottom:6px">${t('result_forfeit_sub')}</div>
         <div class="result-prize" style="color:var(--red)">-${forfeitedAmt.toLocaleString()} ETB</div>
-        <div class="result-sub">Your bet was forfeited. Better luck next time!</div></div>`;
+        <div class="result-sub">${t('result_forfeit_note')}</div></div>`;
     } else {
-    playSound('lose');
     const icon = kicked ? '🚫' : (winnerName === '__last_standing__' ? '🏆' : '😔');
-    const title= kicked ? 'KICKED!' : (winnerName === '__last_standing__' ? 'YOU WIN!' : 'GAME OVER');
+    const title= kicked ? t('result_kick_title') : (winnerName === '__last_standing__' ? t('result_last_title') : t('result_lose_title'));
     const col  = winnerName === '__last_standing__' ? 'var(--green)' : (kicked ? 'var(--red)' : 'var(--red)');
-    const msg  = kicked ? 'False BINGO claim — bet forfeited.'
-               : winnerName === '__last_standing__' ? 'Last player standing — you win the pot!'
-               : (winnerName ? winnerName+' got BINGO!' : 'No winner this round.');
+    const msg  = kicked ? t('result_kick_msg')
+               : winnerName === '__last_standing__' ? t('result_last_msg')
+               : (winnerName ? t('result_winner', winnerName) : t('result_lose_sub'));
     el.innerHTML = `<div class="card ${winnerName==='__last_standing__'?'card-gold win-bg':'lose-bg'} fade-in" style="text-align:center;margin-bottom:12px">
       <div class="result-icon">${icon}</div><div class="result-title" style="color:${col}">${title}</div>
       <div style="font-size:15px;font-weight:700;color:var(--text2);margin-bottom:6px">${msg}</div>
-      <div class="result-sub">${winnerName==='__last_standing__'?'Winnings added to your wallet.':'Better luck next time!'}</div></div>`;
+      <div class="result-sub">${winnerName==='__last_standing__'? t('result_last_sub') : t('result_lose_sub')}</div></div>`;
     }
   }
   // Always show the buttons container (already visible)
@@ -2449,14 +2362,6 @@ function _startCountdownTick(initialSecs) {
   _countdownTicker = setInterval(() => {
     _countdownValue = Math.max(0, _countdownValue - 1);
     _updateCountdownDisplay();
-    if (_countdownValue > 0) {
-      if (_countdownValue <= 5) {
-        playSound('countdown-final');
-      } else {
-        playSound('countdown');
-      }
-    }
-   
   }, 1000);
 }
 
@@ -2491,7 +2396,7 @@ async function playAgain() {
       const gm2 = await api('POST', '/api/games', { bet_amount: S.lastBet });
       S.selectedBet = S.lastBet;
       await enterPickerForGame(gm2.id);
-      toast('Your lucky number is taken — pick a new one', 'error');
+      toast(t('toast_num_taken'), 'error');
     } catch(_) {
       showScreen('screen-lobby'); refreshLobby();
     }
@@ -2757,6 +2662,490 @@ function spawnConfetti() {
     c.appendChild(p);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   MULTI-LANGUAGE SUPPORT — English (en) & Amharic (am)
+═══════════════════════════════════════════════════════════ */
+const TRANSLATIONS = {
+  en: {
+    // ── Welcome ──
+    welcome_greeting:     (name) => `Hello, ${name}! 👋`,
+    welcome_tagline:      'The Ultimate Bingo Experience',
+    welcome_sub:          'Pick your numbers · Mark your card · Shout BINGO!\nBet 10–100 ETB and win big prizes every round.',
+    btn_start:            'START PLAYING →',
+    btn_connecting:       '⏳ Connecting…',
+    btn_retry:            'RETRY →',
+
+    // ── Register ──
+    reg_title:            'New Player',
+    reg_bonus:            '🎁 Welcome Bonus + 10% on First Deposit!',
+    reg_username_label:   'Choose Your Username',
+    reg_username_ph:      'e.g. BingoKing99',
+    reg_phone_label:      'Phone Number',
+    reg_phone_ph:         '09XXXXXXXX',
+    reg_phone_hint:       'Required · tap 📲 to share from Telegram',
+    btn_create:           'CREATE ACCOUNT & PLAY',
+    reg_footer:           'Username: 2–20 chars · No spaces',
+
+    // ── Nav ──
+    nav_play:             'Play',
+    nav_deposit:          'Deposit',
+    nav_withdraw:         'Withdraw',
+    nav_friends:          'Friends',
+    nav_leaderboard:      'Ranks',
+    nav_history:          'History',
+    nav_admin:            'Admin',
+
+    // ── Lobby ──
+    lobby_bet_title:      '🎯 Choose Your Bet',
+    lobby_waiting:        'waiting',
+    lobby_open_rooms:     'Open Rooms',
+    lobby_join:           'JOIN',
+    lobby_pot:            'Pot',
+    lobby_prize:          'Prize',
+    lobby_players:        'Players',
+
+    // ── Picker ──
+    picker_title:         '🔢 Pick Lucky Number',
+    picker_taken:         'Red = Taken',
+    picker_nums:          'Numbers 1–100',
+    picker_card1:         'Card 1 Lucky Number',
+    picker_card2:         'Card 2 Lucky Number',
+    picker_dual_title:    '🃏 Add 2nd Card',
+    picker_dual_sub:      'Double bet · Double chance!',
+    btn_preview:          'PREVIEW CARD →',
+    btn_back_lobby:       '← Back to Lobby',
+
+    // ── Preview ──
+    preview_title_single: '🃏 Your BINGO Card',
+    preview_title_dual:   '🃏 Your BINGO Cards',
+    preview_proceed_msg:  'Happy with your card? Tap Proceed to enter the game.',
+    preview_proceed_dual: (n, n2) => `Cards ${n} & ${n2} ready. Tap Proceed to enter.`,
+    btn_proceed:          'PROCEED →',
+    btn_change:           '🔄 Change',
+
+    // ── Game ──
+    game_card_title:      'MY BINGO CARD',
+    game_waiting_msg:     '⏳ Waiting for another player to join…',
+    game_countdown_msg:   '✅ Countdown started! Get ready…',
+    game_starts_in:       'STARTS IN',
+    game_called:          'CALLED',
+    btn_leave:            'Leave Game',
+    btn_forfeit:          'Forfeit Game',
+    btn_bingo:            '🎉 BINGO!',
+    game_players:         (n) => `${n} player${n !== 1 ? 's' : ''}`,
+
+    // ── Status labels ──
+    status_waiting:       'Waiting',
+    status_countdown:     'Countdown ⏱',
+    status_active:        'LIVE 🔴',
+    status_finished:      'Finished',
+
+    // ── BINGO Overlay ──
+    overlay_prize:        (amt) => `+${amt.toLocaleString()} ETB PRIZE!`,
+    overlay_msg:          'Congratulations! Winnings added to your wallet.',
+
+    // ── Result ──
+    result_win_title:     'YOU WIN!',
+    result_win_sub:       'Winnings added to your wallet.',
+    result_lose_title:    'GAME OVER',
+    result_lose_sub:      'Better luck next time!',
+    result_kick_title:    'KICKED!',
+    result_kick_msg:      'False BINGO claim — bet forfeited.',
+    result_last_title:    'YOU WIN!',
+    result_last_msg:      'Last player standing — you win the pot!',
+    result_last_sub:      'Winnings added to your wallet.',
+    result_forfeit_title: 'FORFEITED',
+    result_forfeit_sub:   'You left during an active game.',
+    result_forfeit_note:  'Your bet was forfeited. Better luck next time!',
+    result_winner:        (name) => `${name} got BINGO!`,
+    btn_play_again:       '▶ PLAY AGAIN',
+    btn_change_lucky:     '🔢 Change Lucky Number',
+
+    // ── Deposit ──
+    dep_title:            '💰 Deposit Funds',
+    dep_send_to:          '📱 Send payment to:',
+    dep_name_ph:          'e.g. Abebe Kebede',
+    dep_amount_ph:        'Min 50 ETB',
+    dep_ref_ph:           'e.g. TXN123456',
+    btn_submit_dep:       'SUBMIT DEPOSIT REQUEST',
+    dep_success:          '✅ Deposit request sent! Credited within 1 hour.',
+
+    // ── Withdraw ──
+    wd_title:             '💳 Withdraw Funds',
+    wd_rules:             '• Min: 200 ETB\n• Must deposit 50+ ETB first\n• 15 total games played\n• 5 games today\n• 1 withdrawal per day\n• Balance ≥ 50 ETB after\n• Processing: ~1 hour',
+    wd_phone_ph:          'Account / phone number',
+    wd_name_ph:           'Full name on account',
+    wd_amount_ph:         'Min 200 ETB',
+    btn_cbe:              '🏦 CBE',
+    btn_telebirr:         '📱 Telebirr',
+    btn_submit_wd:        'REQUEST WITHDRAWAL',
+    wd_success:           '✅ Withdrawal request sent! Processed within ~1 hour.',
+
+    // ── Friends ──
+    friends_title:        '📨 Invite Friends',
+    friends_earn:         (amt, per) => `Earn ${amt} ETB every ${per} friends!`,
+    friends_link_label:   'Your Referral Link',
+    friends_count:        'Friends Referred',
+    friends_next:         'For Next Bonus',
+    friends_recent:       'Recent Friends',
+    btn_copy:             '📋 Copy',
+    btn_share:            '📤 Share',
+
+    // ── Leaderboard ──
+    lb_title:             '🏆 Leaderboard',
+
+    // ── History ──
+    hist_title:           '📜 Game History',
+    hist_win:             'WIN',
+    hist_loss:            'LOSS',
+    hist_left:            'LEFT',
+
+    // ── Profile ──
+    profile_stats:        'Your Stats',
+    profile_games:        'Games',
+    profile_wins:         'Wins',
+    profile_wr:           'Win Rate',
+    profile_won:          'ETB Won',
+    profile_balance:      'Balance',
+    profile_username:     'Username',
+
+    // ── Leave modal ──
+    leave_title:          'Leave Game?',
+    leave_forfeit_warn:   '⚠️ Game is active — leaving forfeits your bet!',
+    leave_confirm:        'Leave',
+    leave_cancel:         'Cancel',
+
+    // ── Toasts ──
+    toast_reconnected:    'Reconnected to game!',
+    toast_open_tg:        'Open in Telegram to share phone',
+    toast_phone_filled:   'Phone filled from Telegram!',
+    toast_copied:         (label) => `${label} copied!`,
+    toast_welcome:        'Welcome! Your account is ready 🎁',
+    toast_leave_first:    'Leave or forfeit the game first to access the menu.',
+    toast_select_bet:     'Select a bet amount first',
+    toast_no_balance:     'Insufficient balance',
+    toast_pick_num:       'Pick a lucky number first!',
+    toast_num_taken:      'Your lucky number is taken — pick a new one',
+    toast_wrong_bingo:    '❌ Wrong BINGO! Removed from game.',
+    toast_need_etb:       (amt) => `You need at least ${amt} ETB to play this bet`,
+    toast_enter_name:     'Enter your name as it appears on the payment',
+    toast_min_deposit:    'Min deposit is 50 ETB',
+    toast_enter_ref:      'Enter transaction reference/SMS code',
+    toast_select_bank:    'Select payment method (CBE or Telebirr)',
+    toast_enter_phone:    'Enter account/phone number',
+    toast_enter_acct:     'Enter account holder name',
+    toast_min_wd:         (min) => `Minimum withdrawal is ${min} ETB`,
+    toast_no_friends:     'Could not load friends',
+    toast_username_short: 'Username must be 2+ characters',
+    toast_username_long:  'Username too long (max 20)',
+    toast_username_space: 'No spaces in username',
+    toast_phone_req:      'Phone number is required',
+    toast_phone_invalid:  'Enter a valid phone number',
+    toast_game_ended:     'Game ended — please select another lobby',
+    toast_game_over:      'Game over — tap Proceed to join the next game!',
+
+    // ── Language toggle ──
+    lang_toggle:          'አማርኛ',
+  },
+
+  am: {
+    // ── Welcome ──
+    welcome_greeting:     (name) => `ሰላም, ${name}! 👋`,
+    welcome_tagline:      'ምርጡን ቢንጎ ጨዋታ ይቀላቀሉን!',
+    welcome_sub:          'ዕድለኛ ቁጥርዎን ይምረጡ · ካርድዎ ላይ ምልክት ያድርጉ · ቢንጎ ይበሉ!\n10–100 ብር ይመድቡ · በየዙሩ ትልቅ ሽልማት ያሸንፉ።',
+    btn_start:            'ጨዋታ ጀምር →',
+    btn_connecting:       '⏳ በማገናኘት ላይ…',
+    btn_retry:            'እንደገና ሞክር →',
+
+    // ── Register ──
+    reg_title:            'አዲስ ተጫዋች',
+    reg_bonus:            '🎁 የእንኳን ደህና መጣህ ቦነስ + 10% በመጀመሪያ ዲፖዚት!',
+    reg_username_label:   'የተጠቃሚ ስም ይምረጡ',
+    reg_username_ph:      'ለምሳሌ BingoKing99',
+    reg_phone_label:      'ስልክ ቁጥር',
+    reg_phone_ph:         '09XXXXXXXX',
+    reg_phone_hint:       'ግዴታ · ከቴሌግራም ለማጋራት 📲 ይጫኑ',
+    btn_create:           'ፕሮፋይል ፍጠር & ተጫወት',
+    reg_footer:           'ስም: 5–10 ፊደል · ክፍተት አይቻልም',
+
+    // ── Nav ──
+    nav_play:             'ተጫወት',
+    nav_deposit:          'ብር አስገባ',
+    nav_withdraw:         'ብር አውጣ',
+    nav_friends:          'ጓደኞች ጋብዝ',
+    nav_leaderboard:      'የመሪዎች ደረጃ',
+    nav_history:          'የጨዋታ ታሪክ',
+    nav_admin:            'አስተዳዳሪ',
+
+    // ── Lobby ──
+    lobby_bet_title:      '🎯 መደብ ይምረጡ',
+    lobby_waiting:        'ጠብቅ',
+    lobby_open_rooms:     'ክፍት ጨዋታዎች',
+    lobby_join:           'ግባ',
+    lobby_pot:            'ድምር',
+    lobby_prize:          'ሽልማት',
+    lobby_players:        'ተጫዋቾች',
+
+    // ── Picker ──
+    picker_title:         '🔢 ዕድለኛ ቁጥር ምረጥ',
+    picker_taken:         'ቀይ = ተወስዷል',
+    picker_nums:          'ቁጥሮች 1–100',
+    picker_card1:         'ካርድ 1 ዕድለኛ ቁጥር',
+    picker_card2:         'ካርድ 2 ዕድለኛ ቁጥር',
+    picker_dual_title:    '🃏 2ኛ ካርድ ምረጥ',
+    picker_dual_sub:      'ደብል ካርድ · ደብል እድል!',
+    btn_preview:          'ካርድ ይመልከቱ →',
+    btn_back_lobby:       '← ወደ ሎቢ ተመለስ',
+
+    // ── Preview ──
+    preview_title_single: '🃏 የቢንጎ ካርድዎ',
+    preview_title_dual:   '🃏 የቢንጎ ካርዶችዎ',
+    preview_proceed_msg:  'ካርዱ ይስማማዎታልን? ወደ ጨዋታ ለመግባት ቀጥል ይጫኑ።',
+    preview_proceed_dual: (n, n2) => `ካርዶች ${n} & ${n2} ዝግጁ። ቀጥል ይጫኑ።`,
+    btn_proceed:          'ቀጥል →',
+    btn_change:           '🔄 ቀይር',
+
+    // ── Game ──
+    game_card_title:      'የቢንጎ ካርዴ',
+    game_waiting_msg:     '⏳ ሌላ ተጫዋች እየጠበቅን ነው…',
+    game_countdown_msg:   '✅ ቆጠራ ጀምሯል! ዝግጁ ሁን…',
+    game_starts_in:       'ይጀምራል',
+    game_called:          'ተጠርቷል',
+    btn_leave:            'ከጨዋታው ውጣ',
+    btn_forfeit:          'ፎርፌ',
+    btn_bingo:            '🎉 ቢንጎ!',
+    game_players:         (n) => `${n} ተጫዋች${n !== 1 ? 'ዎች' : ''}`,
+
+    // ── Status labels ──
+    status_waiting:       'በመጠበቅ ላይ',
+    status_countdown:     'ቆጠራ ⏱',
+    status_active:        'ቀጥታ 🔴',
+    status_finished:      'ተጠናቋል',
+
+    // ── BINGO Overlay ──
+    overlay_prize:        (amt) => `+${amt.toLocaleString()} ብር ሽልማት!`,
+    overlay_msg:          'እንኳን ደስ አልዎ! ሽልማቱ ወደ ዋሌትዎ ተጨምሯል።',
+
+    // ── Result ──
+    result_win_title:     'አሸነፉ!',
+    result_win_sub:       'ሽልማቱ ወደ ዋሌትዎ ተጨምሯል።',
+    result_lose_title:    'ጨዋታ ተጠናቋል',
+    result_lose_sub:      'እንደገና ይሞክሩ!',
+    result_kick_title:    'ከጨዋታው ወጡ!',
+    result_kick_msg:      'የተሳሳተ ቢንጎ — መደብዎ ተበልቷል።',
+    result_last_title:    'አሸነፉ!',
+    result_last_msg:      'ብቻዎን ቀሩ — ሽልማቱን ሁሉ አሸነፉ!',
+    result_last_sub:      'ሽልማቱ ወደ ዋሌትዎ ተጨምሯል።',
+    result_forfeit_title: 'ፎርፌ',
+    result_forfeit_sub:   'ጨዋታ ሳይጠናቀቅ ስለለቀቁ።',
+    result_forfeit_note:  'መደብዎ ተበልቷል። እንደገና ይሞክሩ!',
+    result_winner:        (name) => `${name} ቢንጎ አሸነፈ!`,
+    btn_play_again:       '▶ እንደገና ተጫወት',
+    btn_change_lucky:     '🔢 ዕድለኛ ቁጥር ቀይር',
+
+    // ── Deposit ──
+    dep_title:            '💰 ገንዘብ አስገባ',
+    dep_send_to:          '📱 ክፍያ ይላኩ ወደ:',
+    dep_name_ph:          'ለምሳሌ አበበ ከበደ',
+    dep_amount_ph:        'ቢያንስ 50 ብር',
+    dep_ref_ph:           'ለምሳሌ TXN123456',
+    btn_submit_dep:       'የዲፖዚት ጥያቄ ላክ',
+    dep_success:          '✅ የዲፖዚት ጥያቄ ተልኳል! እንደተረጋገጠ ወደ ዋሌት ይጨምራል።',
+
+    // ── Withdraw ──
+    wd_title:             '💳 ገንዘብ አውጣ',
+    wd_rules:             '• ቢያንስ: 200 ብር\n• ቢያንስ 50+ ብር ተቀማጭ ማድረግ አለ\n• ጠቅላላ 15 ጨዋታ መጫወት አለቦት\n• ዛሬ 5 ጨዋታ መጫወት አለቦት\n• በቀን 1 ጊዜ ብቻ ነው ወጪ\n• ከወጪ በኋላ ≥ 50 ብር መቅረት \n• የሚወስደው ጊዜ: ~1 ሰዓት',
+    wd_phone_ph:          'አካውንት / ስልክ ቁጥር',
+    wd_name_ph:           'ሙሉ ስም',
+    wd_amount_ph:         'ቢያንስ 200 ብር',
+    btn_cbe:              '🏦 CBE',
+    btn_telebirr:         '📱 ቴሌብር',
+    btn_submit_wd:        'የወጪ ጥያቄ ላክ',
+    wd_success:           '✅ የወጪ ጥያቄ ተልኳል! በ~1 ሰዓት ውስጥ ይላካል።',
+
+    // ── Friends ──
+    friends_title:        '📨 ጓደኞች ጋብዝ',
+    friends_earn:         (amt, per) => `${amt} ብር ካዛ ${per} ጓደኛ ሲጋብዙ!`,
+    friends_link_label:   'የጥሪ ሊንክዎ',
+    friends_count:        'የጋበዟቸው ጓደኞች',
+    friends_next:         'ለቀጣይ ቦነስ',
+    friends_recent:       'የቅርብ ጊዜ ጓደኞች',
+    btn_copy:             '📋 ቅዳ',
+    btn_share:            '📤 አጋራ',
+
+    // ── Leaderboard ──
+    lb_title:             '🏆 የመሪዎች ዝርዝር',
+
+    // ── History ──
+    hist_title:           '📜 የጨዋታ ታሪክ',
+    hist_win:             'አሸነፈ',
+    hist_loss:            'ተሸነፈ',
+    hist_left:            'ፎርፌ',
+
+    // ── Profile ──
+    profile_stats:        'ስታቲስቲክስ',
+    profile_games:        'ጨዋታዎች',
+    profile_wins:         'ድሎች',
+    profile_wr:           'የድል 率',
+    profile_won:          'ያሸነፈ ብር',
+    profile_balance:      'ቀሪ ገንዘብ',
+    profile_username:     'ስም',
+
+    // ── Leave modal ──
+    leave_title:          'ጨዋታ ትለቃለህ?',
+    leave_forfeit_warn:   '⚠️ ጨዋታ ቀጥሏል — ከለቀቁ መደብዎ ይበላል!',
+    leave_confirm:        'ልቀቅ',
+    leave_cancel:         'ይቅር',
+
+    // ── Toasts ──
+    toast_reconnected:    'ወደ ጨዋታ ለማስገባት ሙከራ ላይ!',
+    toast_open_tg:        'ስልክ ቁጥር ለማጋራት ቴሌግራምን ክፈቱ',
+    toast_phone_filled:   'ስልክ ቁጥር ከቴሌግራም ተሞልቷል!',
+    toast_copied:         (label) => `${label} ተቀድቷል!`,
+    toast_welcome:        'እንኳን ደህና መጣህ! ፕሮፋይል ዝግጁ ነው 🎁',
+    toast_leave_first:    'ሜኑ ለመክፈት ጨዋታ ይልቀቁ።',
+    toast_select_bet:     'ቅድሚያ መደብ ይምረጡ',
+    toast_no_balance:     'ቀሪ ገንዘብ አይበቃም',
+    toast_pick_num:       'ቅድሚያ ዕድለኛ ቁጥር ይምረጡ!',
+    toast_num_taken:      'ቁጥሩ ተወስዷል — ሌላ ይምረጡ',
+    toast_wrong_bingo:    '❌ የተሳሳተ ቢንጎ! ከጨዋታ ወጥተዋል።',
+    toast_need_etb:       (amt) => `ይህን መድብ ለመጫወት ቢያንስ ${amt} ብር ያስፈልጋል`,
+    toast_enter_name:     'የላኩበት ስምዎን ያስገቡ',
+    toast_min_deposit:    'መጀመሪያ ቢያንስ 50 ብር ያስገቡ',
+    toast_enter_ref:      'ሪፈረንስ/SMS ኮድ ያስገቡ',
+    toast_select_bank:    'CBE ወይም ቴሌብር ይምረጡ',
+    toast_enter_phone:    'የስልክ/አካውንት ቁጥር ያስገቡ',
+    toast_enter_acct:     'የባንክ አካውንት ስም ያስገቡ',
+    toast_min_wd:         (min) => `ቢያንስ ${min} ብር ማውጣት ይቻላል`,
+    toast_no_friends:     'ጓደኞችን መጫን አልተቻለም',
+    toast_username_short: 'ስም ቢያንስ 5 ፊደል ያስፈልጋል',
+    toast_username_long:  'ስም ከ10 ፊደል አይብለጥ',
+    toast_username_space: 'ስሙ ላይ ክፍተት አይፈቀድም',
+    toast_phone_req:      'ስልክ ቁጥር ያስፈልጋል',
+    toast_phone_invalid:  'ትክክለኛ ስልክ ቁጥር ያስገቡ',
+    toast_game_ended:     'ጨዋታ ተጠናቋል — ሌላ ሎቢ ይምረጡ',
+    toast_game_over:      'ጨዋታ አለቀ — ቀጥል ይጫኑ ለቀጣይ ጨዋታ!',
+
+    // ── Language toggle ──
+    lang_toggle:          'English',
+  }
+};
+
+let _lang = localStorage.getItem('bb_lang') || 'en';
+
+function t(key, ...args) {
+  const dict = TRANSLATIONS[_lang] || TRANSLATIONS.en;
+  const val  = dict[key] ?? TRANSLATIONS.en[key];
+  if (!val) return key;
+  return typeof val === 'function' ? val(...args) : val;
+}
+
+function setLang(lang) {
+  _lang = lang;
+  localStorage.setItem('bb_lang', lang);
+  applyLang();
+}
+
+function toggleLang() {
+  setLang(_lang === 'en' ? 'am' : 'en');
+}
+
+function applyLang() {
+  // Language toggle button
+  const lb = document.getElementById('lang-btn');
+  if (lb) lb.textContent = t('lang_toggle');
+
+  // Static HTML elements
+  const map = {
+    'btn-welcome':        t('btn_start'),
+    'btn-create-acct':    t('btn_create'),
+    'btn-preview':        t('btn_preview'),
+    'btn-proceed':        t('btn_proceed'),
+    'btn-back-lobby':     t('btn_back_lobby'),
+    'game-card-title-label': t('game_card_title'),
+    'leave-modal-title':  t('leave_title'),
+    'leave-confirm-btn':  t('leave_confirm'),
+    'leave-cancel-btn':   t('leave_cancel'),
+    'overlay-msg-static': t('overlay_msg'),
+  };
+  Object.entries(map).forEach(([id, txt]) => {
+    const el = document.getElementById(id);
+    if (el && txt) el.textContent = txt;
+  });
+
+  // Placeholders
+  const phs = {
+    'input-username': t('reg_username_ph'),
+    'input-phone':    t('reg_phone_ph'),
+    'dep-sender-name':t('dep_name_ph'),
+    'dep-amount':     t('dep_amount_ph'),
+    'dep-ref':        t('dep_ref_ph'),
+    'wd-phone':       t('wd_phone_ph'),
+    'wd-account-name':t('wd_name_ph'),
+    'wd-amount':      t('wd_amount_ph'),
+  };
+  Object.entries(phs).forEach(([id, ph]) => {
+    const el = document.getElementById(id);
+    if (el) el.placeholder = ph;
+  });
+
+  // Labels
+  const labels = {
+    'reg-username-label': t('reg_username_label'),
+    'reg-phone-label':    t('reg_phone_label'),
+    'reg-phone-hint':     t('reg_phone_hint'),
+    'reg-footer-hint':    t('reg_footer'),
+    'reg-bonus-badge':    t('reg_bonus'),
+    'lobby-bet-title':    t('lobby_bet_title'),
+    'picker-title':       t('picker_title'),
+    'dep-title':          t('dep_title'),
+    'dep-send-to':        t('dep_send_to'),
+    'wd-title':           t('wd_title'),
+    'friends-title':      t('friends_title'),
+    'friends-link-label': t('friends_link_label'),
+    'friends-count-lbl':  t('friends_count'),
+    'friends-next-lbl':   t('friends_next'),
+    'friends-recent-lbl': t('friends_recent'),
+    'lb-title':           t('lb_title'),
+    'history-title':      t('hist_title'),
+    'leave-forfeit-warn': t('leave_forfeit_warn'),
+    'game-starts-in':     t('game_starts_in'),
+    'game-called-label':  t('game_called'),
+    'picker-taken-hint':  t('picker_taken'),
+    'picker-nums-hint':   t('picker_nums'),
+    'picker-card1-label': t('picker_card1'),
+    'picker-card2-label': t('picker_card2'),
+    'picker-dual-title':  t('picker_dual_title'),
+    'picker-dual-sub':    t('picker_dual_sub'),
+    'btn-submit-dep':     t('btn_submit_dep'),
+    'btn-submit-wd':      t('btn_submit_wd'),
+    'btn-cbe':            t('btn_cbe'),
+    'btn-telebirr':       t('btn_telebirr'),
+    'btn-copy-link':      t('btn_copy'),
+    'btn-share-link':     t('btn_share'),
+    'btn-play-again':     t('btn_play_again'),
+    'btn-change-lucky':   t('btn_change_lucky'),
+    'profile-stats-lbl':  t('profile_stats'),
+  };
+  Object.entries(labels).forEach(([id, txt]) => {
+    const el = document.getElementById(id);
+    if (el && txt) el.textContent = txt;
+  });
+
+  // Re-render nav (labels change)
+  if (S.user) renderNav();
+  // Re-render lobby bet waiting counts
+  document.querySelectorAll('.bet-players [data-waiting]').forEach(el => {
+    el.nextSibling && (el.nextSibling.textContent = ' ' + t('lobby_waiting'));
+  });
+  // Stat box labels
+  ['profile-lbl-games','profile-lbl-wins','profile-lbl-wr','profile-lbl-won'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = [t('profile_games'), t('profile_wins'), t('profile_wr'), t('profile_won')][i];
+  });
+}
+
 </script>
 </body>
 </html>
