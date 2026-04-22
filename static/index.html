@@ -1048,10 +1048,10 @@ body::before {
       <div id="result-inner"></div>
       <div id="result-actions" style="padding:0 4px">
         <div id="result-replay-btns" style="margin-top:10px">
-          <button class="btn btn-gold" style="margin-bottom:8px" onclick="playAgain()">▶ PLAY AGAIN  <span style="font-size:10px;opacity:.8">(same lucky number)</span></button>
-          <button class="btn btn-ghost" style="margin-bottom:8px" onclick="resultChangeLucky()">🔢 CHANGE LUCKY NUMBER</button>
-          <button class="btn btn-ghost" style="margin-bottom:8px" onclick="backToLobby()">🏠 BACK TO LOBBY</button>
-          <button class="btn btn-ghost" style="margin-top:4px" onclick="goToHistory()">📜 View History</button>
+          <button class="btn btn-gold" style="margin-bottom:8px" id="btn-play-again" onclick="playAgain()">▶ PLAY AGAIN  <span style="font-size:10px;opacity:.8">(same lucky number)</span></button>
+          <button class="btn btn-ghost" style="margin-bottom:8px" id="btn-change-lucky" onclick="resultChangeLucky()">🔢 CHANGE LUCKY NUMBER</button>
+          <button class="btn btn-ghost" style="margin-bottom:8px" id="btn-back-lobby-result" onclick="backToLobby()">🏠 BACK TO LOBBY</button>
+          <button class="btn btn-ghost" style="margin-top:4px" id="btn-view-history" onclick="goToHistory()">📜 View History</button>
         </div>
       </div>
     </div>
@@ -1079,7 +1079,7 @@ body::before {
         <!-- Payment info box -->
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:2">
           📱 <b id="dep-send-to">Send payment to:</b><br>
-          CBE: <span id="dep-cbe" style="font-family:monospace;color:var(--gold);cursor:pointer;font-weight:700" onclick="copyText('1000532982565','CBE number')">1000532982565</span> (Tewodros Ephrem) <span style="font-size:10px;color:var(--text3)" onclick="copyText('1000532982565','CBE number')">📋</span><br>
+          CBE: <span id="dep-cbe" style="font-family:monospace;color:var(--gold);cursor:pointer;font-weight:700" onclick="copyText('1000321953757','CBE number')">1000321953757</span> (Tewodros Ephrem) <span style="font-size:10px;color:var(--text3)" onclick="copyText('1000321953757','CBE number')">📋</span><br>
           Telebirr: <span id="dep-tel" style="font-family:monospace;color:var(--gold);cursor:pointer;font-weight:700" onclick="copyText('0913252238','Telebirr number')">0913252238</span> (Tewodros Ephrem) <span style="font-size:10px;color:var(--text3)" onclick="copyText('0913252238','Telebirr number')">📋</span><br>
           Reference: <span id="dep-ref-code" style="font-family:monospace;color:var(--green);font-weight:700;cursor:pointer" onclick="copyText(document.getElementById('dep-ref-code').textContent,'Reference')">JB-…</span> <span style="font-size:10px;color:var(--text3)" onclick="copyText(document.getElementById('dep-ref-code').textContent,'Reference')">📋</span>
         </div>
@@ -1224,7 +1224,7 @@ body::before {
           <strong>💰 Deposit Rules</strong><br>
           • Minimum: <strong>50 ETB</strong><br>
           • First deposit: <strong>+10% bonus</strong><br>
-          • Send to: CBE <code>1000532982565</code> or Telebirr <code>0913252238</code><br>
+          • Send to: CBE <code>1000321953757</code> or Telebirr <code>0913252238</code><br>
           • Reference: <code>JB-[Your Telegram ID]</code><br>
           • Processing: ~1 hour<br><br>
 
@@ -1242,7 +1242,6 @@ body::before {
           • Earn <strong>20 ETB</strong> every 10 friends who join<br><br>
 
           <strong>⚖️ Fair Play</strong><br>
-          • No bots / multiple accounts<br>
           • Cheating = permanent ban<br>
           • All numbers are randomly generated
         </div>
@@ -1452,6 +1451,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   const saved = localStorage.getItem('bb_theme');
   if (saved === 'light') applyTheme(true, false);
   else document.getElementById('theme-toggle')?.classList.remove('on');
+  applyLang();
   try {
     const res = await api('POST', '/api/auth', { tg_user: S.tgUser });
     if (res.status === 'existing') {
@@ -1572,6 +1572,7 @@ async function onLoggedIn() {
   } catch (_) {}
   showScreen('screen-lobby');
   startLobbyPolling();
+  applyLang();
 }
 
 function renderHeader() {
@@ -2457,7 +2458,7 @@ async function doLeave(confirmed) {
 ══════════════════════════════════════════════════════════ */
 async function loadLeaderboard() {
   const el = document.getElementById('leaderboard-list');
-  el.innerHTML = '<div class="empty">Loading…</div>';
+  el.innerHTML = `<div class="empty">${t('loading')}</div>`;
   showLoading(true);
   try {
     const rows = await api('GET', '/api/leaderboard');
@@ -2480,7 +2481,7 @@ async function loadLeaderboard() {
 ══════════════════════════════════════════════════════════ */
 async function loadHistory() {
   const el = document.getElementById('history-list');
-  el.innerHTML = '<div class="empty">Loading…</div>';
+  el.innerHTML = `<div class="empty">${t('loading')}</div>`;
   showLoading(true);
   try {
     const rows = await api('GET', '/api/history');
@@ -2490,7 +2491,7 @@ async function loadHistory() {
       const isLeft = h.result === 'left';
       const colour = h.won ? 'var(--green)' : isLeft ? 'var(--text3)' : 'var(--red)';
       const icon   = h.won ? '✓' : isLeft ? '↩' : '✗';
-      const label  = h.won ? 'WIN' : isLeft ? 'LEFT' : 'LOSS';
+      const label  = h.won ? t('hist_win') : isLeft ? t('hist_left') : t('hist_loss');
       const amount = h.won ? '+' + h.prize_won.toLocaleString() : '-' + h.bet_amount.toLocaleString();
       return `
       <div class="lb-row">
@@ -2521,12 +2522,12 @@ async function loadAdminStats() {
   try {
     const s = await api('GET', '/api/admin/stats');
     document.getElementById('admin-stats').innerHTML = `
-      <div class="stat-box"><div class="stat-val">${s.active_games}</div><div class="stat-lbl">Live Games</div></div>
-      <div class="stat-box"><div class="stat-val">${s.finished_games}</div><div class="stat-lbl">Finished</div></div>
-      <div class="stat-box"><div class="stat-val">${(s.total_prizes||0).toLocaleString()}</div><div class="stat-lbl">Prizes ETB</div></div>
-      <div class="stat-box"><div class="stat-val" style="color:#f6a623">${(s.house_cut_etb||0).toLocaleString()}</div><div class="stat-lbl">House ETB</div></div>
+      <div class="stat-box"><div class="stat-val">${s.active_games}</div><div class="stat-lbl">${t('admin_live')}</div></div>
+      <div class="stat-box"><div class="stat-val">${s.finished_games}</div><div class="stat-lbl">${t('admin_finished')}</div></div>
+      <div class="stat-box"><div class="stat-val">${(s.total_prizes||0).toLocaleString()}</div><div class="stat-lbl">${t('admin_prizes')}</div></div>
+      <div class="stat-box"><div class="stat-val" style="color:#f6a623">${(s.house_cut_etb||0).toLocaleString()}</div><div class="stat-lbl">${t('admin_house')}</div></div>
     `;
-  } catch (e) { document.getElementById('admin-stats').innerHTML = '<div class="empty">Error loading stats</div>'; }
+  } catch (e) { document.getElementById('admin-stats').innerHTML = `<div class="empty">${t('admin_error_stats')}</div>`; }
 }
 
 async function loadAdminGames() {
@@ -2534,7 +2535,7 @@ async function loadAdminGames() {
   try {
     const games = await api('GET', '/api/admin/games');
     const active = games.filter(g=>g.status!=='finished');
-    if (!active.length) { el.innerHTML = '<div class="empty">No active games.</div>'; return; }
+    if (!active.length) { el.innerHTML = `<div class="empty">${t('admin_no_games')}</div>`; return; }
     el.innerHTML = active.map(g=>`
       <div class="user-row">
         <div class="u-info">
@@ -2543,7 +2544,7 @@ async function loadAdminGames() {
         </div>
         <button class="btn btn-danger btn-sm" onclick="adminForceFinish('${g.id}')">End</button>
       </div>`).join('');
-  } catch (_) { el.innerHTML = '<div class="empty">Error loading games.</div>'; }
+  } catch (_) { el.innerHTML = `<div class="empty">${t('admin_error_games')}</div>`; }
 }
 
 async function loadAdminUsers() {
@@ -2566,19 +2567,19 @@ async function loadAdminUsers() {
           <div class="u-meta">${u.wins}W · ${u.games_played}G · ${u.balance.toLocaleString()} ETB · TG:${u.tg_id}</div>
         </div>
       </div>`).join('');
-  } catch (_) { el.innerHTML = '<div class="empty">Error loading users.</div>'; }
+  } catch (_) { el.innerHTML = `<div class="empty">${t('admin_error_users')}</div>`; }
 }
 
 async function adminSetAdmin(makeAdmin) {
   const username = (document.getElementById('admin-promote-uname')?.value || '').trim();
-  if (!username) { toast('Enter a username', 'error'); return; }
+  if (!username) { toast(t('toast_enter_username'), 'error'); return; }
   try {
     const res = await api('GET', '/api/admin/users?q=' + encodeURIComponent(username));
     const users = res.users || (Array.isArray(res) ? res : []);
     const target = users.find(u => u.username === username);
-    if (!target) { toast('User not found', 'error'); return; }
+    if (!target) { toast(t('toast_user_not_found'), 'error'); return; }
     await api('POST', `/api/admin/users/${target.id}/admin`, { is_admin: makeAdmin });
-    toast(makeAdmin ? `✅ ${username} is now admin` : `✅ ${username} admin removed`, 'success');
+    toast(makeAdmin ? t('toast_admin_make', username) : t('toast_admin_remove', username), 'success');
     loadAdminUsers();
   } catch(e) { toast(e.message || 'Error', 'error'); }
 }
@@ -2586,10 +2587,10 @@ async function adminSetAdmin(makeAdmin) {
 async function adminAdjust() {
   const username = document.getElementById('admin-uname').value.trim();
   const amount   = parseInt(document.getElementById('admin-amt').value);
-  if (!username || isNaN(amount)) { toast('Fill in username and amount', 'error'); return; }
+  if (!username || isNaN(amount)) { toast(t('toast_fill_username_amount'), 'error'); return; }
   try {
     const res = await api('POST', '/api/admin/funds', { username, amount });
-    toast(`${res.username} new balance: ${res.new_balance.toLocaleString()} ETB`, 'success');
+    toast(t('toast_balance_updated', res.username, res.new_balance), 'success');
     loadAdminStats();
   } catch (e) { toast(e.message, 'error'); }
 }
@@ -2598,7 +2599,7 @@ async function adminForceFinish(gid) {
   if (!confirm(`Force finish game ${gid}? Players will be refunded.`)) return;
   try {
     const res = await api('POST', `/api/admin/games/${gid}/finish`);
-    toast(`Game ended. ${res.refunded} players refunded.`, 'success');
+    toast(t('toast_game_ended_refunded', res.refunded), 'success');
     loadAdminGames();
   } catch (e) { toast(e.message, 'error'); }
 }
@@ -2685,7 +2686,7 @@ const TRANSLATIONS = {
     reg_phone_ph:         '09XXXXXXXX',
     reg_phone_hint:       'Required · tap 📲 to share from Telegram',
     btn_create:           'CREATE ACCOUNT & PLAY',
-    reg_footer:           'Username: 2–20 chars · No spaces',
+    reg_footer:           'Username: 5–10 chars · No spaces',
 
     // ── Nav ──
     nav_play:             'Play',
@@ -2694,6 +2695,7 @@ const TRANSLATIONS = {
     nav_friends:          'Friends',
     nav_leaderboard:      'Ranks',
     nav_history:          'History',
+    nav_instructions:     'Instructions',
     nav_admin:            'Admin',
 
     // ── Lobby ──
@@ -2845,6 +2847,59 @@ const TRANSLATIONS = {
     toast_game_ended:     'Game ended — please select another lobby',
     toast_game_over:      'Game over — tap Proceed to join the next game!',
 
+    // ── Instructions ──
+    instructions_title:   'How to Play',
+    instructions_sub:     'Rules & Guide',
+    instructions_text:    'Instructions',
+
+    // ── Admin labels ──
+    admin_live:           'Live Games',
+    admin_finished:       'Finished',
+    admin_prizes:         'Prizes ETB',
+    admin_house:          'House ETB',
+    admin_no_games:       'No active games.',
+    admin_error_stats:    'Error loading stats',
+    admin_error_games:    'Error loading games.',
+    admin_error_users:    'Error loading users.',
+
+    // ── History labels ──
+    hist_win:             'WIN',
+    hist_loss:            'LOSS',
+    hist_left:            'LEFT',
+    hist_bet:             'bet',
+    hist_empty:           'No games yet.',
+    hist_tx_empty:        'No transactions yet.',
+    hist_loading:         'Loading…',
+
+    // ── Profile labels (extended) ──
+    profile_balance_lbl:  'Balance',
+    profile_username_lbl: 'Username',
+    profile_wins_lbl:     'Wins',
+    profile_wr_lbl:       'Win Rate',
+    profile_won_lbl:      'ETB Won',
+
+    // ── Lobby ──
+    lobby_join:           'JOIN',
+    lobby_empty:          'No open rooms — tap + to create one.',
+
+    // ── Result extra ──
+    btn_view_history:     '📜 View History',
+    btn_back:             '← Back',
+    result_win_bal:       'ETB Balance',
+
+    // ── General ──
+    loading:              'Loading…',
+    error_generic:        'An error occurred.',
+
+    // ── Toast extras ──
+    toast_fill_username_amount: 'Fill in username and amount',
+    toast_enter_username:       'Enter a username',
+    toast_user_not_found:       'User not found',
+    toast_admin_make:           (u) => `✅ ${u} is now admin`,
+    toast_admin_remove:         (u) => `✅ ${u} admin removed`,
+    toast_balance_updated:      (u, b) => `${u} new balance: ${b.toLocaleString()} ETB`,
+    toast_game_ended_refunded:  (n) => `Game ended. ${n} players refunded.`,
+
     // ── Language toggle ──
     lang_toggle:          'አማርኛ',
   },
@@ -2852,35 +2907,36 @@ const TRANSLATIONS = {
   am: {
     // ── Welcome ──
     welcome_greeting:     (name) => `ሰላም, ${name}! 👋`,
-    welcome_tagline:      'የምርጥ ቢንጎ ተሞክሮ',
-    welcome_sub:          'ቁጥርዎን ይምረጡ · ካርዶን ምልክት ያድርጉ · ቢንጎ ይበሉ!\n10–100 ብር ይዋርዱ · በየዙሩ ትልቅ ሽልማት ያሸንፉ።',
+    welcome_tagline:      'ወደ ምርጡ ቢንጎ ይግቡ!',
+    welcome_sub:          'ቁጥርዎን ይምረጡ · ካርዶ ላይ ምልክት ያድርጉ · ቢንጎ ይበሉ!\n10–100 ብር ይመድቡ · በየዙሩ ትልቅ ሽልማት ያሸንፉ።',
     btn_start:            'ጨዋታ ጀምር →',
     btn_connecting:       '⏳ በማገናኘት ላይ…',
     btn_retry:            'እንደገና ሞክር →',
 
     // ── Register ──
     reg_title:            'አዲስ ተጫዋች',
-    reg_bonus:            '🎁 የእንኳን ደህና መጣህ ቦነስ + 10% በመጀመሪያ ዲፖዚት!',
+    reg_bonus:            '🎁 የእንኳን ደህና መጣህ ቦነስ + 10% ለመጀመሪያ ዲፖዚት!',
     reg_username_label:   'የተጠቃሚ ስም ይምረጡ',
     reg_username_ph:      'ለምሳሌ BingoKing99',
     reg_phone_label:      'ስልክ ቁጥር',
     reg_phone_ph:         '09XXXXXXXX',
     reg_phone_hint:       'ግዴታ · ከቴሌግራም ለማጋራት 📲 ይጫኑ',
-    btn_create:           'መለያ ፍጠር & ጫወት',
-    reg_footer:           'ስም: 2–20 ፊደል · ክፍተት የለም',
+    btn_create:           'መለያ ፍጠር እና ተጫወት',
+    reg_footer:           'ስም: 5–10 ፊደል · ክፍተት አይቻልም',
 
     // ── Nav ──
-    nav_play:             'ጫወት',
-    nav_deposit:          'አስቀምጥ',
-    nav_withdraw:         'አውጣ',
+    nav_play:             'ተጫወት',
+    nav_deposit:          'ገቢ',
+    nav_withdraw:         'ወጪ',
     nav_friends:          'ጓደኞች',
-    nav_leaderboard:      'ደረጃ',
-    nav_history:          'ታሪክ',
+    nav_leaderboard:      'የመሪዎች ደረጃ',
+    nav_history:          'የጨዋታ ታሪክ',
+    nav_instructions:     'የጨዋታ መመሪያ',
     nav_admin:            'አስተዳዳሪ',
 
     // ── Lobby ──
-    lobby_bet_title:      '🎯 ዋጋ ይምረጡ',
-    lobby_waiting:        'እየጠበቀ',
+    lobby_bet_title:      '🎯 መደብ ይምረጡ',
+    lobby_waiting:        'እየጠበቁ',
     lobby_open_rooms:     'ክፍት ጨዋታዎች',
     lobby_join:           'ግባ',
     lobby_pot:            'ድምር',
@@ -2894,13 +2950,13 @@ const TRANSLATIONS = {
     picker_card1:         'ካርድ 1 ዕድለኛ ቁጥር',
     picker_card2:         'ካርድ 2 ዕድለኛ ቁጥር',
     picker_dual_title:    '🃏 2ኛ ካርድ አክል',
-    picker_dual_sub:      'ድርብ ዋጋ · ድርብ እድል!',
+    picker_dual_sub:      'ሁለት ካርድ · ሁለት እድል!',
     btn_preview:          'ካርድ ይመልከቱ →',
     btn_back_lobby:       '← ወደ ሎቢ ተመለስ',
 
     // ── Preview ──
     preview_title_single: '🃏 የቢንጎ ካርድዎ',
-    preview_title_dual:   '🃏 የቢንጎ ካርዶችዎ',
+    preview_title_dual:   '🃏 የቢንጎ ካርዶች',
     preview_proceed_msg:  'ካርዱ ይስማማዎታልን? ወደ ጨዋታ ለመግባት ቀጥል ይጫኑ።',
     preview_proceed_dual: (n, n2) => `ካርዶች ${n} & ${n2} ዝግጁ። ቀጥል ይጫኑ።`,
     btn_proceed:          'ቀጥል →',
@@ -2912,8 +2968,8 @@ const TRANSLATIONS = {
     game_countdown_msg:   '✅ ቆጠራ ጀምሯል! ዝግጁ ሁን…',
     game_starts_in:       'ይጀምራል',
     game_called:          'ተጠርቷል',
-    btn_leave:            'ጨዋታ ለቀቅ',
-    btn_forfeit:          'አስረክብ',
+    btn_leave:            'ከጨዋታ ውጣ',
+    btn_forfeit:          'ፎርፌ',
     btn_bingo:            '🎉 ቢንጎ!',
     game_players:         (n) => `${n} ተጫዋች${n !== 1 ? 'ዎች' : ''}`,
 
@@ -2932,42 +2988,42 @@ const TRANSLATIONS = {
     result_win_sub:       'ሽልማቱ ወደ ዋሌትዎ ተጨምሯል።',
     result_lose_title:    'ጨዋታ ተጠናቋል',
     result_lose_sub:      'ሌላ ጊዜ ይሞክሩ!',
-    result_kick_title:    'ተወገዱ!',
-    result_kick_msg:      'የተሳሳተ ቢንጎ — ዋጋዎ ተወርሷል።',
+    result_kick_title:    'ተባረዋል!',
+    result_kick_msg:      'የተሳሳተ ቢንጎ — መደብዎ ተበልቷል።',
     result_last_title:    'አሸነፉ!',
-    result_last_msg:      'ብቻዎ ቀሩ — ድምሩን ሁሉ አሸነፉ!',
+    result_last_msg:      'ብቻዎን ቀሩ — መደቡን ሁሉ አሸነፉ!',
     result_last_sub:      'ሽልማቱ ወደ ዋሌትዎ ተጨምሯል።',
-    result_forfeit_title: 'አስረከቡ',
-    result_forfeit_sub:   'ጨዋታ ሳይጠናቀቅ ለቀቁ።',
-    result_forfeit_note:  'ዋጋዎ ተወርሷል። ሌላ ጊዜ ይሞክሩ!',
+    result_forfeit_title: 'ፎርፌ',
+    result_forfeit_sub:   'ጨዋታ ሳይጠናቀቅ ስለወጡ።',
+    result_forfeit_note:  'መደብዎ ተበልቷል። እንደገና ይሞክሩ!',
     result_winner:        (name) => `${name} ቢንጎ አሸነፈ!`,
-    btn_play_again:       '▶ እንደገና ጫወት',
+    btn_play_again:       '▶ እንደገና ተጫወት',
     btn_change_lucky:     '🔢 ዕድለኛ ቁጥር ቀይር',
 
     // ── Deposit ──
-    dep_title:            '💰 ገንዘብ አስቀምጥ',
-    dep_send_to:          '📱 ክፍያ ይላኩ ወደ:',
+    dep_title:            '💰 ገንዘብ አስጋባ',
+    dep_send_to:          '📱 መላ ይላኩ ወደ:',
     dep_name_ph:          'ለምሳሌ አበበ ከበደ',
     dep_amount_ph:        'ቢያንስ 50 ብር',
     dep_ref_ph:           'ለምሳሌ TXN123456',
     btn_submit_dep:       'የዲፖዚት ጥያቄ ላክ',
-    dep_success:          '✅ የዲፖዚት ጥያቄ ተልኳል! በ1 ሰዓት ይጨምራል።',
+    dep_success:          '✅ የዲፖዚት ጥያቄ ተልኳል! እንደተረጋገጠ ይጨመራል።',
 
     // ── Withdraw ──
     wd_title:             '💳 ገንዘብ አውጣ',
-    wd_rules:             '• ቢያንስ: 200 ብር\n• 50+ ብር አስቀምጠው መሆን አለበት\n• ጠቅላላ 15 ጨዋታ\n• ዛሬ 5 ጨዋታ\n• በቀን 1 ጊዜ\n• ከወሰዱ በኋላ ≥ 50 ብር\n• ሂደት: ~1 ሰዓት',
-    wd_phone_ph:          'መለያ / ስልክ ቁጥር',
+    wd_rules:             '• ቢያንስ: 200 ብር\n• መጀመሪያ ቢያንስ 50+ ብር ተቀማጭ መሆን አለበት\n• ጠቅላላ 15 ጨዋታ መጫወት አለብህ\n• ዛሬ 5 ጨዋታ መጫወት አለብህ\n• በቀን 1 ጊዜ ብቻ ነው ወጪ\n• ከወጪ በኋላ ≥ 50 ብር መቅረት አለበት\n• ሂደት: በ1 ሰዓት ውስጥ',
+    wd_phone_ph:          'አካውንት / ስልክ ቁጥር',
     wd_name_ph:           'ሙሉ ስም',
     wd_amount_ph:         'ቢያንስ 200 ብር',
     btn_cbe:              '🏦 CBE',
     btn_telebirr:         '📱 ቴሌብር',
     btn_submit_wd:        'የወጪ ጥያቄ ላክ',
-    wd_success:           '✅ የወጪ ጥያቄ ተልኳል! በ~1 ሰዓት ይሰራል።',
+    wd_success:           '✅ የወጪ ጥያቄ ተልኳል! በ1 ሰዓት ውስጥ ይላካል።',
 
     // ── Friends ──
     friends_title:        '📨 ጓደኞች ጋብዝ',
     friends_earn:         (amt, per) => `${amt} ብር ካዛ ${per} ጓደኛ ሲጋብዙ!`,
-    friends_link_label:   'የጥሪ ሊንክዎ',
+    friends_link_label:   'የግብዣ ሊንክዎ',
     friends_count:        'የጋበዟቸው ጓደኞች',
     friends_next:         'ለቀጣይ ቦነስ',
     friends_recent:       'የቅርብ ጊዜ ጓደኞች',
@@ -2975,12 +3031,12 @@ const TRANSLATIONS = {
     btn_share:            '📤 አጋራ',
 
     // ── Leaderboard ──
-    lb_title:             '🏆 የደረጃ ሰሌዳ',
+    lb_title:             '🏆 የመሪዎች ዝርዝር',
 
     // ── History ──
     hist_title:           '📜 የጨዋታ ታሪክ',
     hist_win:             'አሸነፈ',
-    hist_loss:            'ሸነፈ',
+    hist_loss:            'ተሸነፈ',
     hist_left:            'ለቀቀ',
 
     // ── Profile ──
@@ -2994,38 +3050,129 @@ const TRANSLATIONS = {
 
     // ── Leave modal ──
     leave_title:          'ጨዋታ ትለቃለህ?',
-    leave_forfeit_warn:   '⚠️ ጨዋታ ቀጥሏል — ከለቀቁ ዋጋዎ ይወረሳል!',
-    leave_confirm:        'ለቀቅ',
-    leave_cancel:         'ሰርዝ',
+    leave_forfeit_warn:   '⚠️ ጨዋታ ቀጥሏል — ከለቀቁ መደብዎ ይበላል!',
+    leave_confirm:        'ውጣ',
+    leave_cancel:         'ይቅር',
 
     // ── Toasts ──
-    toast_reconnected:    'ወደ ጨዋታ ተሳሰርን!',
+    toast_reconnected:    'ወደ ጨዋታ በድጋሚ ገብተናል!',
     toast_open_tg:        'ስልክ ቁጥር ለማጋራት ቴሌግራምን ክፈቱ',
     toast_phone_filled:   'ስልክ ቁጥር ከቴሌግራም ተሞልቷል!',
     toast_copied:         (label) => `${label} ተቀድቷል!`,
     toast_welcome:        'እንኳን ደህና መጣህ! መለያዎ ዝግጁ ነው 🎁',
-    toast_leave_first:    'ምናሌ ለመክፈት ጨዋታ ይልቀቁ።',
-    toast_select_bet:     'ቅድሚያ ዋጋ ይምረጡ',
+    toast_leave_first:    'ሜኑ ለመክፈት መጀመሪያ ከጨዋታ ውጣ።',
+    toast_select_bet:     'ቅድሚያ መደብ ይምረጡ',
     toast_no_balance:     'ቀሪ ገንዘብ አይበቃም',
     toast_pick_num:       'ቅድሚያ ዕድለኛ ቁጥር ይምረጡ!',
     toast_num_taken:      'ቁጥሩ ተወስዷል — ሌላ ይምረጡ',
     toast_wrong_bingo:    '❌ የተሳሳተ ቢንጎ! ከጨዋታ ወጥተዋል።',
     toast_need_etb:       (amt) => `ይህን ዋጋ ለመጫወት ቢያንስ ${amt} ብር ያስፈልጋል`,
-    toast_enter_name:     'በክፍያ መለያዎ ላይ ያለውን ስምዎን ያስገቡ',
-    toast_min_deposit:    'ቢያንስ 50 ብር ይዋርዱ',
-    toast_enter_ref:      'የሂደት ማጣቀሻ/SMS ኮድ ያስገቡ',
+    toast_enter_name:     'በክፍያው ላይ ያለውን ስምዎን ያስገቡ',
+    toast_min_deposit:    'ቢያንስ 50 ብር ያስገቡ',
+    toast_enter_ref:      'የሪፈረንስ/SMS ኮድ ያስገቡ',
     toast_select_bank:    'CBE ወይም ቴሌብር ይምረጡ',
-    toast_enter_phone:    'የስልክ/መለያ ቁጥር ያስገቡ',
-    toast_enter_acct:     'የባንክ ስም ያስገቡ',
-    toast_min_wd:         (min) => `ቢያንስ ${min} ብር ማውጣት ይቻላል`,
+    toast_enter_phone:    'የስልክ ቁጥር ያስገቡ',
+    toast_enter_acct:     'የባንክ ቁጥር ያስገቡ',
+    toast_min_wd:         (min) => `ቢያንስ ${min} ብር ነው ማውጣት የሚቻለው`,
     toast_no_friends:     'ጓደኞችን መጫን አልተቻለም',
-    toast_username_short: 'ስም ቢያንስ 2 ፊደል ያስፈልጋል',
-    toast_username_long:  'ስም ከ20 ፊደል አይበልጥ',
+    toast_username_short: 'ስም ቢያንስ 5 ፊደል ያስፈልጋል',
+    toast_username_long:  'ስም ከ10 ፊደል አይብለጥ',
     toast_username_space: 'ስሙ ላይ ክፍተት አይፈቀድም',
     toast_phone_req:      'ስልክ ቁጥር ያስፈልጋል',
     toast_phone_invalid:  'ትክክለኛ ስልክ ቁጥር ያስገቡ',
-    toast_game_ended:     'ጨዋታ ተጠናቋል — ሌላ ሎቢ ይምረጡ',
+    toast_game_ended:     'ጨዋታ ተጠናቋል — ሌላ ክፍት ጨዋታ ይምረጡ',
     toast_game_over:      'ጨዋታ አለቀ — ቀጥል ይጫኑ ለቀጣይ ጨዋታ!',
+
+    // ── Instructions ──
+    instructions_title:   'እንዴት መጫወት እንደሚቻል',
+    instructions_sub:     'ደንቦች እና መመሪያ',
+    instructions_text: `🎮 እንዴት እንጫወት
+    • እድለኛ ቁጥር ይምረጡ (1–100) → ቢንጎ ካርድ ይፈጠራል
+    • ካርድ፦ 5x5 የሆነ B(1-15), I(16-30), N(31-45), G(46-60), O(61-75)
+    • መሀሉ ነጻ ነው (free ምልክት ተደርጓል)
+    • ቁጥሮች በየ3 ሰከንድ ይወጣሉ (ለምሳሌ B-7, O-65)
+    • የተጠሩትን ቁጥሮች በትክክለኛ ቦታ ላይ ምልክት ያድርጉ
+    • አንድ በቁመት | ፣ በጎን __፣ ዲያጎናል / \ ወይም አራት ማዕዘን ። ላይ ሲመጣ → BINGO! ይጫኑ
+    • ሳይመጣሎት ወይም ተሳሳተው ቢንጎ ካሉ = ከጨዋታ ይወጣሉ (መደብ አይመለስም)
+    • አሸናፊው የመደቡን 90% ይወስዳል
+
+    🏆 የማሸነፊያ መንገዶች
+    • ማንኛውም አግድም ረድፍ __
+    • ማንኛውም ቋሚ አምድ |
+    • ዲያጎናል (ከላይ ግራ ወደ ታች ቀኝ) /
+    • ተቃራኒ ዲያግናል (ከላይ ቀኝ ወደ ታች ግራ) \
+    • አራቱም ማዕዘኖች ። 
+
+   💰 የገቢ ደንቦች
+    • ዝቅተኛ፦ 50 ETB
+    • የመጀመሪያ ተቀማጭ፦ +10% ቦነስ
+    • ወደሚከተለው ላክ፦ CBE 1000321953757 ወይም ቴሌብር 0913252238
+    • ማጣቀሻ፦ JB-[የላኩበት ደረሰኝ ላይ ወይም የተላከሎት ቴክስት ላይ ያለው ሪፈረንስ ቁጥር]
+    • የሚወስደው ጊዜ፦ መግባቱን እንዳረጋገጥን
+
+   💸 የወጪ ደንቦች
+    • ዝቅተኛ፦ 200 ETB
+    • ቢያንስ 50+ ETB ተቀማጭ ማድረግ አለብዎት
+    • አጠቃላይ ጨዋታዎች (እየገቡ የወጡትን አይቆጥርም)፦ ቢያንስ 15
+    • ዛሬ 5 ጨዋታዎችን መጫወት አለብዎት
+    • በቀን 1 ጊዜ ብቻ ማውጣት ይቻላል
+    • ካወጡ በኋላ ቀሪ ሂሳብ ከ 50 ETB በታች መሆን የለበትም
+    • የሚወስደው ጊዜ፦ ቢበዛ 1 ሰዓት
+
+   🎁 የቦነስ ስጦታ
+    • ለመጀመሪያ ገቢ 10% ተጨማሪ
+    • ልዩ ሊንክዎን ያጋሩ፣ በ10 ጓደኞች 20 ETB ያግኙ
+
+   ⚖️ ፍትሃዊ ጨዋታ
+    • ለማጭበርበር የሚሞክር = በቋሚነት ይባረራል`,
+
+    // ── Admin labels ──
+    admin_live:           'ቀጥታ ጨዋታዎች',
+    admin_finished:       'ተጠናቅቋል',
+    admin_prizes:         'ሽልማቶች (ብር)',
+    admin_house:          'ቤቱ ያስገባው(ብር)',
+    admin_no_games:       'ቀጥታ ጨዋታ የለም።',
+    admin_error_stats:    'ስታቲስቲክስ መጫን አልተቻለም',
+    admin_error_games:    'ጨዋታዎች መጫን አልተቻለም።',
+    admin_error_users:    'ተጠቃሚዎች መጫን አልተቻለም።',
+
+    // ── History labels ──
+    hist_win:             'አሸነፈ',
+    hist_loss:            'ተሸነፈ',
+    hist_left:            'ለቀቀ',
+    hist_bet:             'መደብ',
+    hist_empty:           'ምንም የጨዋታ ታሪክ የለም።',
+    hist_tx_empty:        'ምንም ወጪ/ገቢ የለም።',
+    hist_loading:         'በመጫን ላይ…',
+
+    // ── Profile labels (extended) ──
+    profile_balance_lbl:  'ቀሪ ገንዘብ',
+    profile_username_lbl: 'ስም',
+    profile_wins_lbl:     'ድሎች',
+    profile_wr_lbl:       'የድል ምጣኔ',
+    profile_won_lbl:      'ያሸነፈ ብር',
+
+    // ── Lobby ──
+    lobby_join:           'ግባ',
+    lobby_empty:          'ክፍት ጨዋታ የለም — + ይጫኑ ለመጀመር።',
+
+    // ── Result extra ──
+    btn_view_history:     '📜 ታሪክ ይመልከቱ',
+    btn_back:             '← ተመለስ',
+    result_win_bal:       'ብር ቀሪ',
+
+    // ── General ──
+    loading:              'በመጫን ላይ…',
+    error_generic:        'ስህተት ተፈጥሯል።',
+
+    // ── Toast extras ──
+    toast_fill_username_amount: 'ስም እና መጠን ያስገቡ',
+    toast_enter_username:       'ስም ያስገቡ',
+    toast_user_not_found:       'ተጠቃሚ አልተገኘም',
+    toast_admin_make:           (u) => `✅ ${u} አስተዳዳሪ ሆኗል`,
+    toast_admin_remove:         (u) => `✅ ${u} ከአስተዳዳሪነት ተወግዷል`,
+    toast_balance_updated:      (u, b) => `${u} ቀሪ ገንዘብ: ${b.toLocaleString()} ብር`,
+    toast_game_ended_refunded:  (n) => `ጨዋታ ተጠናቋል። ${n} መደብ ተጫዋቾች ተመላሽ ተደርጓል።`,
 
     // ── Language toggle ──
     lang_toggle:          'English',
@@ -3126,6 +3273,8 @@ function applyLang() {
     'btn-share-link':     t('btn_share'),
     'btn-play-again':     t('btn_play_again'),
     'btn-change-lucky':   t('btn_change_lucky'),
+    'btn-back-lobby-result': t('btn_back_lobby'),
+    'btn-view-history':   t('btn_view_history'),
     'profile-stats-lbl':  t('profile_stats'),
   };
   Object.entries(labels).forEach(([id, txt]) => {
