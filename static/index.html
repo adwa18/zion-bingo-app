@@ -865,7 +865,7 @@ body::before {
             <div style="font-size:12px;color:var(--text2);margin-top:4px;line-height:1.7">Pick your numbers · Mark your card · Shout BINGO!<br>Bet 10–100 ETB and win big prizes every round.</div>
           </div>
           <div id="welcome-error" style="display:none;background:rgba(220,50,50,.15);border:1px solid rgba(220,50,50,.4);border-radius:8px;padding:10px 14px;font-size:12px;color:#ff6b6b;margin-bottom:10px;line-height:1.5;text-align:left"></div>
-          <button class="btn btn-gold" id="btn-welcome" onclick="handleWelcomeClick()">START PLAYING →</button>
+          <button class="btn btn-gold" id="btn-welcome" onclick="handleWelcomeClick()" data-i18n="btn_start">START PLAYING →</button>
         </div>
       </div>
     </div>
@@ -880,14 +880,14 @@ body::before {
         <div class="card-title">👤 New Player</div>
         <div class="bonus-badge" id="reg-bonus-badge">🎁 Welcome Bonus + 10% on First Deposit!</div>
         <label class="label" id="reg-username-label" style="margin-top:10px">Choose Your Username</label>
-        <input class="input" id="input-username" type="text" placeholder="e.g. BingoKing99" maxlength="20" autocomplete="off">
+        <input class="input" id="input-username" data-i18n-ph="reg_username_ph" type="text" placeholder="e.g. BingoKing99" maxlength="20" autocomplete="off">
         <label class="label" id="reg-phone-label" style="margin-top:10px">Phone Number <span style="color:var(--red)">*</span></label>
         <div style="display:flex;gap:8px;align-items:flex-start">
-          <input class="input" id="input-phone" type="tel" placeholder="09XXXXXXXX" autocomplete="tel" style="margin-bottom:0;flex:1">
+          <input class="input" id="input-phone" data-i18n-ph="reg_phone_ph" type="tel" placeholder="09XXXXXXXX" autocomplete="tel" style="margin-bottom:0;flex:1">
           <button class="btn btn-ghost btn-sm" style="flex-shrink:0;padding:11px 10px;margin-top:0" onclick="requestTgPhone()" title="Share Telegram phone">📲</button>
         </div>
         <div style="font-size:11px;color:var(--text3);margin-bottom:10px;margin-top:4px">Required · tap 📲 to share from Telegram</div>
-        <button class="btn btn-gold" id="btn-create-acct" onclick="submitRegister()">CREATE ACCOUNT & PLAY</button>
+        <button class="btn btn-gold" id="btn-create-acct" onclick="submitRegister()" data-i18n="btn_create">CREATE ACCOUNT & PLAY</button>
         <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:10px">Username: 2–20 chars · No spaces</div>
       </div>
     </div>
@@ -958,7 +958,7 @@ body::before {
           </div>
         </div>
 
-        <button class="btn btn-gold" id="preview-btn" onclick="goToPreview()">PREVIEW CARD →</button>
+        <button class="btn btn-gold" id="preview-btn" onclick="goToPreview()" data-i18n="btn_preview">PREVIEW CARD →</button>
       </div>
 
 
@@ -985,7 +985,7 @@ body::before {
       </div>
       <div class="card slide-up">
         <div style="margin-bottom:10px;font-size:12px;color:var(--text2)" id="preview-proceed-msg">Happy with your card? Press Proceed to enter the game!</div>
-        <button class="btn btn-gold" onclick="proceedToGame()">PROCEED →</button>
+        <button class="btn btn-gold" onclick="proceedToGame()" data-i18n="btn_proceed">PROCEED →</button>
       </div>
     </div>
 
@@ -1048,10 +1048,10 @@ body::before {
       <div id="result-inner"></div>
       <div id="result-actions" style="padding:0 4px">
         <div id="result-replay-btns" style="margin-top:10px">
-          <button class="btn btn-gold" style="margin-bottom:8px" id="btn-play-again" onclick="playAgain()">▶ PLAY AGAIN  <span style="font-size:10px;opacity:.8">(same lucky number)</span></button>
-          <button class="btn btn-ghost" style="margin-bottom:8px" id="btn-change-lucky" onclick="resultChangeLucky()">🔢 CHANGE LUCKY NUMBER</button>
-          <button class="btn btn-ghost" style="margin-bottom:8px" id="btn-back-lobby-result" onclick="backToLobby()">🏠 BACK TO LOBBY</button>
-          <button class="btn btn-ghost" style="margin-top:4px" id="btn-view-history" onclick="goToHistory()">📜 View History</button>
+          <button class="btn btn-gold" style="margin-bottom:8px" id="btn-play-again" onclick="playAgain()" data-i18n="btn_play_again">▶ PLAY AGAIN  <span style="font-size:10px;opacity:.8">(same lucky number)</span></button>
+          <button class="btn btn-ghost" style="margin-bottom:8px" id="btn-change-lucky" onclick="resultChangeLucky()" data-i18n="btn_change_lucky">🔢 CHANGE LUCKY NUMBER</button>
+          <button class="btn btn-ghost" style="margin-bottom:8px" id="btn-back-lobby-result" onclick="backToLobby()" data-i18n="btn_back_lobby">🏠 BACK TO LOBBY</button>
+          <button class="btn btn-ghost" style="margin-top:4px" id="btn-view-history" onclick="goToHistory()" data-i18n="btn_view_history">📜 View History</button>
         </div>
       </div>
     </div>
@@ -1087,11 +1087,11 @@ body::before {
         <label class="label">Your Name (as sent on payment) <span style="color:var(--red)">*</span></label>
         <input class="input" id="dep-sender-name" type="text" placeholder="e.g. Abebe Kebede" required>
         <label class="label" style="margin-top:8px">Amount (ETB) <span style="color:var(--red)">*</span></label>
-        <input class="input" id="dep-amount" type="number" min="10" max="5000" placeholder="Min 50 ETB" required>
+        <input class="input" id="dep-amount" data-i18n-ph="dep_amount_ph" type="number" min="10" max="5000" placeholder="Min 50 ETB" required>
         <label class="label" style="margin-top:8px">Transaction Reference / SMS Code <span style="color:var(--red)">*</span></label>
-        <input class="input" id="dep-ref" type="text" placeholder="e.g. TXN123456" required>
-        <button class="btn btn-gold" style="margin-top:14px" onclick="submitDeposit()">SUBMIT DEPOSIT REQUEST</button>
-        <button class="btn btn-ghost" style="margin-top:6px" onclick="showScreen('screen-lobby')">← Back</button>
+        <input class="input" id="dep-ref" data-i18n-ph="dep_ref_ph" type="text" placeholder="e.g. TXN123456" required>
+        <button class="btn btn-gold" style="margin-top:14px" onclick="submitDeposit()" data-i18n="btn_submit_dep">SUBMIT DEPOSIT REQUEST</button>
+        <button class="btn btn-ghost" style="margin-top:6px" onclick="showScreen('screen-lobby')" data-i18n="btn_back">← Back</button>
       </div>
     </div>
 
@@ -1100,15 +1100,7 @@ body::before {
       <div class="card card-gold fade-in">
         <div class="card-title" id="wd-title">💳 Withdraw Funds</div>
         <div style="background:var(--surface2);border-radius:10px;padding:10px;margin-bottom:12px;font-size:11px;color:var(--text2);line-height:1.6">
-          <strong style="color:var(--amber)">Withdrawal Rules</strong><br>
-          • Minimum: <strong>200 ETB</strong><br>
-          • Must have at least one deposit of 50+ ETB<br>
-          • Total games played (excl. left): at least <strong>15</strong><br>
-          • Must play <strong>5 games today</strong> before withdrawing<br>
-          • Only <strong>1 withdrawal per day</strong><br>
-          • After withdrawal, balance must be ≥ 50 ETB<br>
-          • Processing: ~1 hour
-        </div>
+        <div id="wd-rules-box" style="background:var(--surface2);border-radius:10px;padding:10px;margin-bottom:12px;font-size:11px;color:var(--text2);line-height:1.8"></div>
         <div id="wd-error" class="error-box"></div>
         <label class="label">Payment Method <span style="color:var(--red)">*</span></label>
         <div style="display:flex;gap:8px;margin-bottom:4px">
@@ -1117,12 +1109,12 @@ body::before {
         </div>
         <input type="hidden" id="wd-bank">
         <label class="label" style="margin-top:8px">Account Number <span style="color:var(--red)">*</span></label>
-        <input class="input" id="wd-phone" type="tel" placeholder="e.g. 0944156222 or CBE account">
+        <input class="input" id="wd-phone" data-i18n-ph="wd_phone_ph" type="tel" placeholder="e.g. 0944156222 or CBE account">
         <label class="label" style="margin-top:8px">Account Holder Name <span style="color:var(--red)">*</span></label>
         <input class="input" id="wd-account-name" type="text" placeholder="Full name on account">
         <label class="label" style="margin-top:8px">Amount (ETB) <span style="color:var(--red)">*</span></label>
-        <input class="input" id="wd-amount" type="number" min="200" placeholder="Min 200 ETB">
-        <button class="btn btn-gold" style="margin-top:14px" onclick="submitWithdraw()">SUBMIT WITHDRAWAL</button>
+        <input class="input" id="wd-amount" data-i18n-ph="wd_amount_ph" type="number" min="200" placeholder="Min 200 ETB">
+        <button class="btn btn-gold" style="margin-top:14px" onclick="submitWithdraw()" data-i18n="btn_submit_wd">SUBMIT WITHDRAWAL</button>
         <button class="btn btn-ghost" style="margin-top:6px" onclick="showScreen('screen-lobby')">← Back</button>
       </div>
     </div>
@@ -1133,31 +1125,31 @@ body::before {
         <div class="card-title" id="friends-title">📨 Invite Friends</div>
         <div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:14px;text-align:center">
           <div style="font-size:28px">🎁</div>
-          <div style="font-size:13px;font-weight:700;color:var(--text);margin:6px 0">Earn 20 ETB every 10 friends!</div>
-          <div style="font-size:11px;color:var(--text2)">Share your link → they register → you earn</div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin:6px 0">span data-i18n="friends_earn_static" data-i18n="friends_earn_static">Earn 20 ETB every 10 friends!</span>/div>
+          <div style="font-size:11px;color:var(--text2)" data-i18n="friends_earn_sub">Share your link → they register → you earn</div>
         </div>
         <div style="margin-bottom:14px">
-          <div style="font-size:11px;color:var(--text3);margin-bottom:4px">YOUR REFERRAL LINK</div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:4px" data-i18n="friends_link_label_uc">YOUR REFERRAL LINK</div>
           <div id="friends-link" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:11px;word-break:break-all;color:var(--gold);cursor:pointer" onclick="copyReferralLink()"></div>
-          <button class="btn btn-ghost btn-sm" style="margin-top:6px;width:100%" onclick="copyReferralLink()">📋 Copy Link</button>
+          <button class="btn btn-ghost btn-sm" style="margin-top:6px;width:100%" onclick="copyReferralLink()" data-i18n="btn_copy_link">📋 Copy Link</button>
         </div>
         <div style="display:flex;gap:12px;margin-bottom:14px">
           <div style="flex:1;background:var(--surface2);border-radius:10px;padding:12px;text-align:center">
             <div style="font-size:24px;font-weight:900;font-family:'Orbitron',monospace;color:var(--gold)" id="friends-count">0</div>
-            <div style="font-size:11px;color:var(--text2)">Friends Joined</div>
+            <div style="font-size:11px;color:var(--text2)" data-i18n="friends_count">Friends Joined</div>
           </div>
           <div style="flex:1;background:var(--surface2);border-radius:10px;padding:12px;text-align:center">
             <div style="font-size:24px;font-weight:900;font-family:'Orbitron',monospace;color:var(--green)" id="friends-next">10</div>
-            <div style="font-size:11px;color:var(--text2)">For Next Bonus</div>
+            <div style="font-size:11px;color:var(--text2)" data-i18n="friends_next">For Next Bonus</div>
           </div>
         </div>
         <div class="progress-bar">
           <div class="progress-fill" id="ref-progress"></div>
         </div>
         <div id="ref-next-message" style="font-size:11px; color:var(--text3); margin-top:5px;"></div>
-        <div class="card-title" style="font-size:12px;margin-bottom:8px;margin-top:12px">Recent Friends</div>
+        <div class="card-title" style="font-size:12px;margin-bottom:8px;margin-top:12px" data-i18n="friends_recent">Recent Friends</div>
         <div id="friends-list" style="font-size:12px;color:var(--text2)"><div class="empty">Loading…</div></div>
-        <button class="btn btn-ghost" style="margin-top:12px" onclick="shareReferralTelegram()">📤 Share via Telegram</button>
+        <button class="btn btn-ghost" style="margin-top:12px" onclick="shareReferralTelegram()" data-i18n="btn_share_tg">📤 Share via Telegram</button>
       </div>
     </div>
 
@@ -1168,16 +1160,16 @@ body::before {
         <div class="stat-grid" id="admin-stats"></div>
       </div>
       <div class="card fade-in">
-        <div class="card-title">💰 Adjust Wallet</div>
+        <div class="card-title" data-i18n="admin_adjust_title">💰 Adjust Wallet</div>
         <label class="label">Username</label>
-        <input class="input" id="admin-uname" placeholder="Enter username" list="admin-uname-list" autocomplete="off">
+        <input class="input" id="admin-uname" data-i18n-ph="admin_username_ph" placeholder="Enter username" list="admin-uname-list" autocomplete="off">
         <datalist id="admin-uname-list"></datalist>
         <label class="label">Amount (+ add  /  − deduct)</label>
-        <input class="input" id="admin-amt" type="number" placeholder="e.g. 500 or -200">
-        <button class="btn btn-gold" onclick="adminAdjust()">APPLY ADJUSTMENT</button>
+        <input class="input" id="admin-amt" data-i18n-ph="admin_amount_ph" type="number" placeholder="e.g. 500 or -200">
+        <button class="btn btn-gold" onclick="adminAdjust()" data-i18n="admin_apply_btn">APPLY ADJUSTMENT</button>
       </div>
       <div class="card fade-in">
-        <div class="card-title">🎮 Active Games</div>
+        <div class="card-title" data-i18n="admin_active_games_title">🎮 Active Games</div>
         <div id="admin-games-list"></div>
         <button class="btn btn-ghost" style="margin-top:8px" onclick="loadAdminGames()">↻ Refresh</button>
       </div>
@@ -1187,8 +1179,8 @@ body::before {
         <label class="label">Username to Promote / Demote</label>
         <input class="input" id="admin-promote-uname" placeholder="Enter Admin username" list="admin-uname-list" autocomplete="off">
         <div style="display:flex;gap:8px;margin-top:10px">
-          <button class="btn btn-gold" style="flex:1" onclick="adminSetAdmin(true)">👑 Make Admin</button>
-          <button class="btn btn-ghost" style="flex:1" onclick="adminSetAdmin(false)">🚫 Remove Admin</button>
+          <button class="btn btn-gold" style="flex:1" onclick="adminSetAdmin(true)" data-i18n="admin_make_btn">👑 Make Admin</button>
+          <button class="btn btn-ghost" style="flex:1" onclick="adminSetAdmin(false)" data-i18n="admin_remove_btn">🚫 Remove Admin</button>
         </div>
       </div>
       <div class="card fade-in">
@@ -1202,49 +1194,8 @@ body::before {
     <!-- ── INSTRUCTIONS SCREEN ── -->
     <div class="screen" id="screen-instructions">
       <div class="card card-gold fade-in">
-        <div class="card-title">📖 Game Instructions</div>
-        <div style="padding:10px; line-height:1.8; font-size:13px;">
-          <strong>🎮 How to Play</strong><br>
-          • Pick a lucky number (1–100) → generates your BINGO card<br>
-          • Card: 5x5 grid with columns B (1-15), I (16-30), N (31-45), G (46-60), O (61-75)<br>
-          • Center is FREE (automatically marked)<br>
-          • Numbers called every 3 seconds (e.g. B-7, O-65)<br>
-          • Mark matching numbers in the correct column<br>
-          • Complete a row, column, diagonal, or four corners → tap BINGO!<br>
-          • Wrong claim = removed from game (no refund)<br>
-          • Winner takes <strong>90% of the pot</strong><br><br>
-
-          <strong>🏆 Winning Patterns</strong><br>
-          • Any horizontal row<br>
-          • Any vertical column<br>
-          • Main diagonal (top-left to bottom-right)<br>
-          • Anti-diagonal (top-right to bottom-left)<br>
-          • Four corners (FREE cell counts as a corner)<br><br>
-
-          <strong>💰 Deposit Rules</strong><br>
-          • Minimum: <strong>50 ETB</strong><br>
-          • First deposit: <strong>+10% bonus</strong><br>
-          • Send to: CBE <code>1000321953757</code> or Telebirr <code>0913252238</code><br>
-          • Reference: <code>JB-[Your Telegram ID]</code><br>
-          • Processing: ~1 hour<br><br>
-
-          <strong>💸 Withdrawal Rules</strong><br>
-          • Minimum: <strong>200 ETB</strong><br>
-          • Must have at least one deposit of 50+ ETB<br>
-          • Total games played (excl. left): at least <strong>15</strong><br>
-          • Must play <strong>5 games today</strong> before withdrawing<br>
-          • Only <strong>1 withdrawal per day</strong><br>
-          • After withdrawal, balance must be ≥ 50 ETB<br>
-          • Processing: ~1 hour<br><br>
-
-          <strong>🎁 Referral Program</strong><br>
-          • Share your unique link<br>
-          • Earn <strong>20 ETB</strong> every 10 friends who join<br><br>
-
-          <strong>⚖️ Fair Play</strong><br>
-          • Cheating = permanent ban<br>
-          • All numbers are randomly generated
-        </div>
+        <div class="card-title" id="instr-card-title">📖 Game Instructions</div>
+        <div id="instr-body" style="padding:4px 0;line-height:1.9;font-size:13px;"></div>
       </div>
     </div>
 
@@ -1587,13 +1538,13 @@ function renderHeader() {
 function renderNav() {
   const u = S.user;
   const items = [
-    { icon:'🎮', label:'Play',           screen:'screen-lobby',       fn:'goToLobby' },
+    { icon:'🎮', label:t('nav_play'),         screen:'screen-lobby',       fn:'goToLobby' },
     { icon:'💰', label:t('nav_deposit'),        screen:'screen-deposit',     fn:'loadDeposit' },
     { icon:'💳', label:t('nav_withdraw'),       screen:'screen-withdraw',    fn:'loadWithdraw' },
     { icon:'📨', label:t('nav_friends'), screen:'screen-friends',     fn:'loadFriends' },
     { icon:'🏆', label:t('nav_leaderboard'),    screen:'screen-leaderboard', fn:'loadLeaderboard' },
     { icon:'📜', label:t('nav_history'),        screen:'screen-history',     fn:'loadHistory' },
-    { icon:'📖', label:'Instructions',   screen:'screen-instructions', fn:null },
+    { icon:'📖', label:t('nav_instructions'), screen:'screen-instructions', fn:'renderInstructions' },
   ];
   if (u?.is_admin) items.push({ icon:'⚙️', label:t('nav_admin'), screen:'screen-admin', fn:'loadAdmin' });
   
@@ -1633,7 +1584,8 @@ function loadDeposit() {
   const rc = document.getElementById('dep-ref-code');
   if (rc) rc.textContent = 'JB-' + uid;
 }
-function loadWithdraw() {}
+function loadWithdraw() {
+  renderWdRules();}
 function selectWdBank(bank) {
   document.getElementById('wd-bank').value = bank;
   const cbe = document.getElementById('wd-bank-cbe');
@@ -2146,7 +2098,7 @@ async function pollGame() {
       document.getElementById('game-room-label').textContent = gm.id;
       if (gm.status === 'waiting') {
         _stopCountdownTick(); _stopCallTicker();
-        _countdownStarted = false; _gameIsActive = false;
+        _countdownStarted = false; _gameIsActive = false; window._gameIsActive = false;
         document.getElementById('countdown-display').textContent = formatTime(30);
         document.getElementById('waiting-status-msg').textContent = t('game_waiting_msg');
         document.getElementById('game-status-chip').innerHTML = '<div class="chip chip-gold">WAITING</div>';
@@ -2155,14 +2107,14 @@ async function pollGame() {
         if (!_countdownStarted || Math.abs(_countdownValue - serverSecs) > 2) {
           _startCountdownTick(serverSecs);
         }
-        _countdownStarted = true; _gameIsActive = false;
+        _countdownStarted = true; _gameIsActive = false; window._gameIsActive = false;
         document.getElementById('waiting-status-msg').textContent = t('game_countdown_msg');
         document.getElementById('game-status-chip').innerHTML = '<div class="chip chip-green"><span class="dot"></span>COUNTDOWN</div>';
       }
     }
     if (gm.status === 'active') {
       if (leaveBtn) leaveBtn.textContent = t('btn_forfeit');
-      _stopCountdownTick(); _gameIsActive = true;
+      _stopCountdownTick(); _gameIsActive = true; window._gameIsActive = true;
       showPhase('phase-active');
       const called = gm.called_numbers || [];
       document.getElementById('called-count').textContent = called.length;
@@ -2374,7 +2326,8 @@ function _updateCountdownDisplay() {
   const el = document.getElementById('countdown-display');
   if (el) el.textContent = formatTime(_countdownValue);
 }
-let _gameIsActive = false;
+let _gameIsActive = false; window._gameIsActive = false;
+window._gameIsActive = false; window._gameIsActive = false;
 async function playAgain() {
   if (!S.lastBet || !S.lastPickedNum) {
     showScreen('screen-lobby'); refreshLobby(); return;
@@ -2850,7 +2803,7 @@ const TRANSLATIONS = {
     // ── Instructions ──
     instructions_title:   'How to Play',
     instructions_sub:     'Rules & Guide',
-    instructions_text:    'Instructions',
+    instructions_text: { how_title:'🎮 How to Play', how_steps:['Pick lucky number (1-100)','5x5 card: B(1-15) I(16-30) N(31-45) G(46-60) O(61-75)','Center FREE auto-marked','Numbers called every 3s','Mark matching numbers','Row/col/diagonal/4-corners → BINGO!','Wrong claim = removed','Winner gets 90% of pot'], win_title:'🏆 Winning Patterns', win_steps:['Any horizontal row','Any vertical column','Main diagonal (↘)','Anti-diagonal (↙)','Four corners'], dep_title:'💰 Deposit Rules', dep_steps:['Min: 50 ETB','First deposit: +10% bonus','Send to CBE or Telebirr','Processing: ~1hr'], wd_title:'💸 Withdrawal Rules', wd_steps:['Min: 200 ETB','Must have deposited 50+ ETB','15 total games played','5 games today','1 withdrawal per day','Balance ≥50 ETB after','Processing: ~1hr'], ref_title:'🎁 Referral Bonus', ref_steps:['Share your invite link','Earn 20 ETB per 10 friends'], fair_title:'⚖️ Fair Play', fair_steps:['Cheating = permanent ban','Numbers randomly generated'] },
 
     // ── Admin labels ──
     admin_live:           'Live Games',
@@ -2900,7 +2853,43 @@ const TRANSLATIONS = {
     toast_balance_updated:      (u, b) => `${u} new balance: ${b.toLocaleString()} ETB`,
     toast_game_ended_refunded:  (n) => `Game ended. ${n} players refunded.`,
 
-    // ── Language toggle ──
+    // ── Withdraw screen labels ──
+    wd_method_label:      'Payment Method',
+    wd_acct_label:        'Account Number',
+    wd_name_label:        'Account Holder Name',
+    wd_amount_label:      'Amount (ETB)',
+    wd_rules_title:       'Withdrawal Rules',
+
+    // ── Deposit screen labels ──
+    dep_name_label:       'Your Name (as sent on payment)',
+    dep_amount_label:     'Amount (ETB)',
+    dep_ref_label:        'Transaction Reference / SMS Code',
+
+    // ── Admin screen labels ──
+    admin_adjust_title:   '💰 Adjust Wallet',
+    admin_username_lbl:   'Username',
+    admin_amount_lbl:     'Amount (+ add / − deduct)',
+    admin_apply_btn:      'APPLY ADJUSTMENT',
+    admin_active_games_title: '🎮 Active Games',
+    admin_refresh_btn:    '↻ Refresh',
+    admin_promote_lbl:    'Username to Promote / Demote',
+    admin_make_btn:       '👑 Make Admin',
+    admin_remove_btn:     '🚫 Remove Admin',
+    admin_username_ph:    'Search username or TG ID…',
+    admin_amount_ph:      'Amount',
+
+    // ── Friends screen ──
+    friends_earn_static:  'Earn 20 ETB every 10 friends!',
+    friends_earn_sub:     'Share your link → they register → you earn',
+    friends_link_label_uc:'YOUR REFERRAL LINK',
+    btn_copy_link:        '📋 Copy Link',
+    btn_share_tg:         '📤 Share via Telegram',
+
+    // ── General ──
+    btn_back:             '← Back',
+    btn_refresh:          '↻ Refresh',
+
+        // ── Language toggle ──
     lang_toggle:          'አማርኛ',
   },
 
@@ -3086,45 +3075,7 @@ const TRANSLATIONS = {
     // ── Instructions ──
     instructions_title:   'እንዴት መጫወት እንደሚቻል',
     instructions_sub:     'ደንቦች እና መመሪያ',
-    instructions_text: `🎮 እንዴት እንጫወት
-    • እድለኛ ቁጥር ይምረጡ (1–100) → ቢንጎ ካርድ ይፈጠራል
-    • ካርድ፦ 5x5 የሆነ B(1-15), I(16-30), N(31-45), G(46-60), O(61-75)
-    • መሀሉ ነጻ ነው (free ምልክት ተደርጓል)
-    • ቁጥሮች በየ3 ሰከንድ ይወጣሉ (ለምሳሌ B-7, O-65)
-    • የተጠሩትን ቁጥሮች በትክክለኛ ቦታ ላይ ምልክት ያድርጉ
-    • አንድ በቁመት | ፣ በጎን __፣ ዲያጎናል / \ ወይም አራት ማዕዘን ። ላይ ሲመጣ → BINGO! ይጫኑ
-    • ሳይመጣሎት ወይም ተሳሳተው ቢንጎ ካሉ = ከጨዋታ ይወጣሉ (መደብ አይመለስም)
-    • አሸናፊው የመደቡን 90% ይወስዳል
-
-    🏆 የማሸነፊያ መንገዶች
-    • ማንኛውም አግድም ረድፍ __
-    • ማንኛውም ቋሚ አምድ |
-    • ዲያጎናል (ከላይ ግራ ወደ ታች ቀኝ) /
-    • ተቃራኒ ዲያግናል (ከላይ ቀኝ ወደ ታች ግራ) \
-    • አራቱም ማዕዘኖች ። 
-
-   💰 የገቢ ደንቦች
-    • ዝቅተኛ፦ 50 ETB
-    • የመጀመሪያ ተቀማጭ፦ +10% ቦነስ
-    • ወደሚከተለው ላክ፦ CBE 1000321953757 ወይም ቴሌብር 0913252238
-    • ማጣቀሻ፦ JB-[የላኩበት ደረሰኝ ላይ ወይም የተላከሎት ቴክስት ላይ ያለው ሪፈረንስ ቁጥር]
-    • የሚወስደው ጊዜ፦ መግባቱን እንዳረጋገጥን
-
-   💸 የወጪ ደንቦች
-    • ዝቅተኛ፦ 200 ETB
-    • ቢያንስ 50+ ETB ተቀማጭ ማድረግ አለብዎት
-    • አጠቃላይ ጨዋታዎች (እየገቡ የወጡትን አይቆጥርም)፦ ቢያንስ 15
-    • ዛሬ 5 ጨዋታዎችን መጫወት አለብዎት
-    • በቀን 1 ጊዜ ብቻ ማውጣት ይቻላል
-    • ካወጡ በኋላ ቀሪ ሂሳብ ከ 50 ETB በታች መሆን የለበትም
-    • የሚወስደው ጊዜ፦ ቢበዛ 1 ሰዓት
-
-   🎁 የቦነስ ስጦታ
-    • ለመጀመሪያ ገቢ 10% ተጨማሪ
-    • ልዩ ሊንክዎን ያጋሩ፣ በ10 ጓደኞች 20 ETB ያግኙ
-
-   ⚖️ ፍትሃዊ ጨዋታ
-    • ለማጭበርበር የሚሞክር = በቋሚነት ይባረራል`,
+    instructions_text: { how_title:'🎮 እንዴት እንጫወት', how_steps:['ዕድለኛ ቁጥር ይምረጡ (1-100)','5x5 ካርድ: B(1-15) I(16-30) N(31-45) G(46-60) O(61-75)','መሃሉ FREE ነው','ቁጥሮች በ3 ሰከንድ','ቁጥሮቹን ምልክት ያድርጉ','ረድፍ/አምድ/ዲያጎናል → BINGO!','ሳይሟላ ቢንጎ = ይወጣሉ','አሸናፊ 90% ያገኛል'], win_title:'🏆 የማሸነፊያ መንገዶች', win_steps:['አግድም ረድፍ','ቋሚ አምድ','ዋና ዲያጎናል (↘)','ተቃራኒ ዲያጎናል (↙)','አራቱ ማዕዘኖች'], dep_title:'💰 ተቀማጭ ደንቦች', dep_steps:['ዝቅተኛ 50 ብር','የመጀመሪያ: +10% ቦነስ','CBE ወይም ቴሌብር','~1 ሰዓት'], wd_title:'💸 የወጪ ደንቦች', wd_steps:['ዝቅተኛ 200 ብር','50+ ብር ቀደም ማስቀመጥ','15 ጨዋታ ጠቅላላ','ዛሬ 5 ጨዋታ','በቀን 1 ጊዜ','ቀሪ ≥50 ብር','~1 ሰዓት'], ref_title:'🎁 ጓደኛ ሽልማት', ref_steps:['ሊንክዎን ያጋሩ','ለ10 ጓደኞች 20 ብር'], fair_title:'⚖️ ፍትሃዊ ጨዋታ', fair_steps:['ማጭበርበር = እገዳ','ቁጥሮች በዘፈቀደ'] },
 
     // ── Admin labels ──
     admin_live:           'ቀጥታ ጨዋታዎች',
@@ -3174,7 +3125,43 @@ const TRANSLATIONS = {
     toast_balance_updated:      (u, b) => `${u} ቀሪ ገንዘብ: ${b.toLocaleString()} ብር`,
     toast_game_ended_refunded:  (n) => `ጨዋታ ተጠናቋል። ${n} መደብ ተጫዋቾች ተመላሽ ተደርጓል።`,
 
-    // ── Language toggle ──
+    // ── Withdraw screen labels ──
+    wd_method_label:      'የክፍያ ዘዴ',
+    wd_acct_label:        'የሒሳብ ቁጥር',
+    wd_name_label:        'የሒሳብ ባለቤት ስም',
+    wd_amount_label:      'መጠን (ብር)',
+    wd_rules_title:       'የወጪ ደንቦች',
+
+    // ── Deposit screen labels ──
+    dep_name_label:       'ስምዎ (በክፍያው ላይ እንዳለ)',
+    dep_amount_label:     'መጠን (ብር)',
+    dep_ref_label:        'የግብይት ማጣቀሻ / SMS ኮድ',
+
+    // ── Admin screen labels ──
+    admin_adjust_title:   '💰 ዋሌት አስተካክል',
+    admin_username_lbl:   'ስም',
+    admin_amount_lbl:     'መጠን (+ ጨምር / − ቀንስ)',
+    admin_apply_btn:      'ለውጥ ተግብር',
+    admin_active_games_title: '🎮 ቀጥታ ጨዋታዎች',
+    admin_refresh_btn:    '↻ አድስ',
+    admin_promote_lbl:    'ለማስተዳደር/ለማስወገድ ስም',
+    admin_make_btn:       '👑 አስተዳዳሪ አድርግ',
+    admin_remove_btn:     '🚫 አስተዳዳሪ አስወግድ',
+    admin_username_ph:    'ስም ወይም TG ID ፈልግ…',
+    admin_amount_ph:      'መጠን',
+
+    // ── Friends screen ──
+    friends_earn_static:  'ለ10 ጓደኞች 20 ብር ያግኙ!',
+    friends_earn_sub:     'ሊንክዎን ያጋሩ → ሲመዘገቡ → ይከፈልዎታል',
+    friends_link_label_uc:'የጥሪ ሊንክዎ',
+    btn_copy_link:        '📋 ቅዳ',
+    btn_share_tg:         '📤 ቴሌግራም ላይ አጋራ',
+
+    // ── General ──
+    btn_back:             '← ተመለስ',
+    btn_refresh:          '↻ አድስ',
+
+        // ── Language toggle ──
     lang_toggle:          'English',
   }
 };
@@ -3198,7 +3185,124 @@ function toggleLang() {
   setLang(_lang === 'en' ? 'am' : 'en');
 }
 
+
+/* ── renderInstructions: builds instructions screen from t() ── */
+function renderInstructions() {
+  const tx = t('instructions_text');
+  if (!tx || typeof tx !== 'object') return;
+  const body = document.getElementById('instr-body');
+  const title = document.getElementById('instr-card-title');
+  if (title) title.textContent = '📖 ' + t('instructions_title');
+  if (!body) return;
+  const sections = [
+    [tx.how_title,  tx.how_steps],
+    [tx.win_title,  tx.win_steps],
+    [tx.dep_title,  tx.dep_steps],
+    [tx.wd_title,   tx.wd_steps],
+    [tx.ref_title,  tx.ref_steps],
+    [tx.fair_title, tx.fair_steps],
+  ];
+  body.innerHTML = sections.map(([title, steps]) =>
+    `<div style="margin-bottom:14px">
+      <div style="font-weight:800;color:var(--gold);margin-bottom:6px;font-size:14px">${title}</div>
+      ${(steps||[]).map(s => `<div style="display:flex;gap:6px;margin-bottom:4px"><span style="color:var(--amber);flex-shrink:0">•</span><span>${s}</span></div>`).join('')}
+    </div>`
+  ).join('');
+}
+
+/* ── renderWdRules: builds withdraw rules box from t() ── */
+function renderWdRules() {
+  const el = document.getElementById('wd-rules-box');
+  if (!el) return;
+  const tx = t('instructions_text');
+  if (!tx || typeof tx !== 'object') {
+    el.innerHTML = t('wd_rules') || '';
+    return;
+  }
+  el.innerHTML =
+    `<strong style="color:var(--amber)">${tx.wd_title}</strong><br>` +
+    (tx.wd_steps||[]).map(s => `• ${s}`).join('<br>');
+}
+
 function applyLang() {
+  // 1. data-i18n attributes — automatic scan, no ID mapping needed
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const val = t(key);
+    if (val && typeof val === 'string') el.textContent = val;
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const key = el.getAttribute('data-i18n-ph');
+    const val = t(key);
+    if (val) el.placeholder = val;
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.getAttribute('data-i18n-html');
+    const val = t(key);
+    if (val) el.innerHTML = val;
+  });
+
+  // 2. Language toggle button
+  const lb = document.getElementById('lang-btn');
+  if (lb) lb.textContent = t('lang_toggle');
+
+  // 3. Placeholders (for inputs without data-i18n-ph)
+  const phs = {
+    'input-username': 'reg_username_ph', 'input-phone': 'reg_phone_ph',
+    'dep-sender-name':'dep_name_ph',     'dep-amount':  'dep_amount_ph',
+    'dep-ref':        'dep_ref_ph',      'wd-phone':    'wd_phone_ph',
+    'wd-account-name':'wd_name_ph',      'wd-amount':   'wd_amount_ph',
+    'admin-uname':    'admin_username_ph','admin-amt':   'admin_amount_ph',
+  };
+  Object.entries(phs).forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el) el.placeholder = t(key);
+  });
+
+  // 4. Static element map (elements that can't use data-i18n easily)
+  const map = {
+    'btn-welcome':           'btn_start',
+    'btn-create-acct':       'btn_create',
+    'btn-preview':           'btn_preview',
+    'btn-proceed':           'btn_proceed',
+    'btn-back-lobby':        'btn_back_lobby',
+    'btn-back-lobby-result': 'btn_back_lobby',
+    'btn-view-history':      'btn_view_history',
+    'btn-play-again':        'btn_play_again',
+    'btn-change-lucky':      'btn_change_lucky',
+    'game-card-title-label': 'game_card_title',
+    'leave-modal-title':     'leave_title',
+    'leave-confirm-btn':     'leave_confirm',
+    'leave-cancel-btn':      'leave_cancel',
+    'instr-card-title':      'instructions_title',
+  };
+  Object.entries(map).forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = t(key);
+  });
+
+  // 5. Dynamic renders
+  renderInstructions();
+  renderWdRules();
+
+  // 6. Re-render nav + header (labels change)
+  if (S.user) { renderNav(); renderHeader(); }
+
+  // 7. Stat box labels in profile (rendered dynamically in renderNav)
+  ['profile-lbl-games','profile-lbl-wins','profile-lbl-wr','profile-lbl-won'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = [t('profile_games'), t('profile_wins'), t('profile_wr'), t('profile_won')][i];
+  });
+
+  // 8. Game waiting/status labels if visible
+  const wm = document.getElementById('waiting-status-msg');
+  if (wm && wm.textContent) {
+    const gm_status = S.currentGameId ? 'shown' : '';
+    // Let pollGame re-set these; just ensure leave/forfeit label is correct
+  }
+  const lb2 = document.getElementById('leave-btn');
+  if (lb2) lb2.textContent = t(window._gameIsActive ? 'btn_forfeit' : 'btn_leave');
+}
   // Language toggle button
   const lb = document.getElementById('lang-btn');
   if (lb) lb.textContent = t('lang_toggle');
