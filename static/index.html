@@ -1206,7 +1206,7 @@ body::before {
   <!-- FOOTER -->
   <div id="footer" style="display:none">
     <div class="footer-left"></div>
-    <div class="footer-brand">Created by <a href="tel:0913252238" style="color:var(--gold);text-decoration:none;font-weight:700">Benzion Creatives</a> · <a href="https://t.me/BenZcreatives" style="color:var(--gold);text-decoration:none" target="_blank">@BenZcreatives</a></div>
+    <div class="footer-brand">Created by <a href="tel:0913252238" style="color:var(--gold);text-decoration:none;font-weight:700">Benzion Creatives</a></div>
     <div class="theme-toggle" id="theme-toggle" onclick="toggleTheme()"></div>
   </div>
 
@@ -2579,6 +2579,10 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const el = document.getElementById(id);
   if (el) el.classList.add('active');
+  // Hide footer when game screen is active
+  const footer = document.getElementById('footer');
+  if (footer) {
+    footer.style.display = (id === 'screen-game') ? 'none' : 'flex';
 }
 
 function stopLobbyPolling() {
