@@ -2579,10 +2579,7 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const el = document.getElementById(id);
   if (el) el.classList.add('active');
-  // Hide footer when game screen is active
-  const footer = document.getElementById('footer');
-  if (footer) {
-    footer.style.display = (id === 'screen-game') ? 'none' : 'flex';
+  
 }
 
 function stopLobbyPolling() {
@@ -3085,7 +3082,7 @@ const TRANSLATIONS = {
     // ── Instructions ──
     instructions_title:   'እንዴት መጫወት እንደሚቻል',
     instructions_sub:     'ደንቦች እና መመሪያ',
-    instructions_text: { how_title:'🎮 እንዴት እንጫወት', how_steps:['ዕድለኛ ቁጥር ይምረጡ (1-100)','5x5 ካርድ: B(1-15) I(16-30) N(31-45) G(46-60) O(61-75)','መሃሉ FREE ነው','ቁጥሮች በየ3 ሰከንድ ይወጣሉ','ቁጥሮቹን ምልክት ያድርጉ','ረድፍ/አምድ/ዲያጎናል → BINGO!','ሳይሟላ ቢንጎ = ይወጣሉ','አሸናፊ 90% ያገኛል'], win_title:'🏆 የማሸነፊያ መንገዶች', win_steps:['አግድም ረድፍ','ቋሚ አምድ','ዋና ዲያጎናል (↘)','ተቃራኒ ዲያጎናል (↙)','አራቱ ማዕዘኖች'], dep_title:'💰 ተቀማጭ ደንቦች', dep_steps:['ዝቅተኛ 50 ብር','የመጀመሪያ: +10% ቦነስ','CBE ወይም ቴሌብር','~1 ሰዓት'], wd_title:'💸 የወጪ ደንቦች', wd_steps:['ዝቅተኛ 200 ብር','50+ ብር ቀደም ማስቀመጥ','15 ጨዋታ ጠቅላላ','ዛሬ 5 ጨዋታ','በቀን 1 ጊዜ','ቀሪ ≥50 ብር','~1 ሰዓት'], ref_title:'🎁 ጓደኛ ሽልማት', ref_steps:['ሊንክዎን ያጋሩ','ለ10 ጓደኞች 20 ብር'], fair_title:'⚖️ ፍትሃዊ ጨዋታ', fair_steps:['ማጭበርበር = እገዳ','ቁጥሮች በዘፈቀደ'] },
+    instructions_text: { how_title:'🎮 እንዴት እንጫወት', how_steps:['ዕድለኛ ቁጥር ይምረጡ (1-100)','ቢንጎ ካርድ ይመጣል: B(1-15) I(16-30) N(31-45) G(46-60) O(61-75)','መሃሉ FREE ነው','ቁጥሮች በየ3 ሰከንድ ይወጣሉ','ቁጥሮቹን ካርዱ ላይ ምልክት ያድርጉ','ረድፍ/ቁመት/ዲያጎናል ሲሰሩ → BINGO! የሚለውን ይጫኑ','የተሳሳተ ወይም ሳይሟላ ቢንጎ ከነኩ ከጨዋታው ይወጣሉ','አሸናፊ የመደቡን 90% ያገኛል'], win_title:'🏆 የማሸነፊያ መንገዶች', win_steps:['አግድም ረድፍ (-)','ቋሚ አምድ (|)','ዋና ዲያጎናል (↘)','ተቃራኒ ዲያጎናል (↙)','አራቱ ማዕዘኖች (።)'], dep_title:'💰 የገቢ ደንቦች', dep_steps:['ዝቅተኛ 50 ብር','ለመጀመሪያ: +10% ቦነስ','CBE ወይም ቴሌብር','እንደተረጋገጠ ዋሌት ይጨመራል'], wd_title:'💸 የወጪ ደንቦች', wd_steps:['ዝቅተኛ 200 ብር','50+ ብር ቀደሞ ገቢ ማድረግ','ጠቅላላ 15 ጨዋታ መጫወት','ዛሬ 5 ጨዋታ መጫወት','በቀን 1 ጊዜ ብቻ','ቀሪ ቢያንስ 50 ብር መቅረት አለበት','በ1 ሰዓት ውስጥ ይላካል'], ref_title:'🎁 ጓደኛ ሲጋብዙ ሽልማት', ref_steps:['ሊንክዎን ያጋሩ','ለ10 ጓደኞች 20 ብር'], fair_title:'⚖️ ፍትሃዊ ጨዋታ', fair_steps:['ማጭበርበር = ቋሚ እገዳ'] },
 
     // ── Admin labels ──
     admin_live:           'ቀጥታ ጨዋታዎች',
