@@ -212,6 +212,8 @@ body::before {
   display:none;
   -webkit-overflow-scrolling:touch;
 }
+/* Prevent content hiding behind fixed footer */
+#content { padding-bottom: var(--footer-h); }
 .screen.active { display:block; }
 
 /* ── FOOTER ────────────────────────────────────────────── */
@@ -222,7 +224,7 @@ body::before {
   display:flex; align-items:center; justify-content:space-between;
   padding: 0 16px;
   flex-shrink:0; z-index:10;
-  position:relative;
+  position:fixed; bottom:0; left:0; right:0;
 }
 .footer-brand {
   font-family:'Orbitron',monospace;
@@ -1538,13 +1540,13 @@ function renderHeader() {
 function renderNav() {
   const u = S.user;
   const items = [
-    { icon:'🎮', label:t('nav_play'),           screen:'screen-lobby',       fn:'goToLobby' },
+    { icon:'🎮', label:t('nav_play'),         screen:'screen-lobby',       fn:'goToLobby' },
     { icon:'💰', label:t('nav_deposit'),        screen:'screen-deposit',     fn:'loadDeposit' },
     { icon:'💳', label:t('nav_withdraw'),       screen:'screen-withdraw',    fn:'loadWithdraw' },
-    { icon:'📨', label:t('nav_friends'),        screen:'screen-friends',     fn:'loadFriends' },
+    { icon:'📨', label:t('nav_friends'), screen:'screen-friends',     fn:'loadFriends' },
     { icon:'🏆', label:t('nav_leaderboard'),    screen:'screen-leaderboard', fn:'loadLeaderboard' },
     { icon:'📜', label:t('nav_history'),        screen:'screen-history',     fn:'loadHistory' },
-    { icon:'📖', label:t('nav_instructions'),   screen:'screen-instructions', fn:'renderInstructions' },
+    { icon:'📖', label:t('nav_instructions'), screen:'screen-instructions', fn:'renderInstructions' },
   ];
   if (u?.is_admin) items.push({ icon:'⚙️', label:t('nav_admin'), screen:'screen-admin', fn:'loadAdmin' });
   
@@ -1570,8 +1572,8 @@ function renderNav() {
 
 function navTo(screen, fn) {
   closeNav();
-  if (fn && typeof window[fn] === 'function') window[fn]();
   showScreen(screen);
+  if (fn && typeof window[fn] === 'function') window[fn]();
 }
 
 /* ══ DEPOSIT / WITHDRAW / FRIENDS ══════════════════════════════════════ */
@@ -1646,7 +1648,6 @@ async function submitWithdraw() {
 }
 
 async function loadFriends() {
-  console.log('loadFriends called');
   try {
     const stats=await api('GET','/api/referral-stats');
     document.getElementById('friends-count').textContent=stats.referral_count||0;
@@ -2469,7 +2470,6 @@ function goToHistory() { loadHistory(); showScreen('screen-history'); }
    ADMIN
 ══════════════════════════════════════════════════════════ */
 async function loadAdmin() {
-  console.log('loadAdmin called');
   loadAdminStats(); loadAdminGames(); loadAdminUsers();
   const adminCard = document.getElementById('admin-manage-admins-card');
   if (adminCard) adminCard.style.display = (S.user?.is_owner || S.user?.is_admin) ? 'block' : 'none';
@@ -3081,7 +3081,7 @@ const TRANSLATIONS = {
     // ── Instructions ──
     instructions_title:   'እንዴት መጫወት እንደሚቻል',
     instructions_sub:     'ደንቦች እና መመሪያ',
-    instructions_text: { how_title:'🎮 እንዴት እንጫወት', how_steps:['ዕድለኛ ቁጥር ይምረጡ (1-100)','5x5 ካርድ: B(1-15) I(16-30) N(31-45) G(46-60) O(61-75)','መሃሉ FREE ነው','ቁጥሮች በ3 ሰከንድ','ቁጥሮቹን ምልክት ያድርጉ','ረድፍ/አምድ/ዲያጎናል → BINGO!','ሳይሟላ ቢንጎ = ይወጣሉ','አሸናፊ 90% ያገኛል'], win_title:'🏆 የማሸነፊያ መንገዶች', win_steps:['አግድም ረድፍ','ቋሚ አምድ','ዋና ዲያጎናል (↘)','ተቃራኒ ዲያጎናል (↙)','አራቱ ማዕዘኖች'], dep_title:'💰 ተቀማጭ ደንቦች', dep_steps:['ዝቅተኛ 50 ብር','የመጀመሪያ: +10% ቦነስ','CBE ወይም ቴሌብር','~1 ሰዓት'], wd_title:'💸 የወጪ ደንቦች', wd_steps:['ዝቅተኛ 200 ብር','50+ ብር ቀደም ማስቀመጥ','15 ጨዋታ ጠቅላላ','ዛሬ 5 ጨዋታ','በቀን 1 ጊዜ','ቀሪ ≥50 ብር','~1 ሰዓት'], ref_title:'🎁 ጓደኛ ሽልማት', ref_steps:['ሊንክዎን ያጋሩ','ለ10 ጓደኞች 20 ብር'], fair_title:'⚖️ ፍትሃዊ ጨዋታ', fair_steps:['ማጭበርበር = እገዳ','ቁጥሮች በዘፈቀደ'] },
+    instructions_text: { how_title:'🎮 እንዴት እንጫወት', how_steps:['ዕድለኛ ቁጥር ይምረጡ (1-100)','5x5 ካርድ: B(1-15) I(16-30) N(31-45) G(46-60) O(61-75)','መሃሉ FREE ነው','ቁጥሮች በየ3 ሰከንድ ይወጣሉ','ቁጥሮቹን ምልክት ያድርጉ','ረድፍ/አምድ/ዲያጎናል → BINGO!','ሳይሟላ ቢንጎ = ይወጣሉ','አሸናፊ 90% ያገኛል'], win_title:'🏆 የማሸነፊያ መንገዶች', win_steps:['አግድም ረድፍ','ቋሚ አምድ','ዋና ዲያጎናል (↘)','ተቃራኒ ዲያጎናል (↙)','አራቱ ማዕዘኖች'], dep_title:'💰 ተቀማጭ ደንቦች', dep_steps:['ዝቅተኛ 50 ብር','የመጀመሪያ: +10% ቦነስ','CBE ወይም ቴሌብር','~1 ሰዓት'], wd_title:'💸 የወጪ ደንቦች', wd_steps:['ዝቅተኛ 200 ብር','50+ ብር ቀደም ማስቀመጥ','15 ጨዋታ ጠቅላላ','ዛሬ 5 ጨዋታ','በቀን 1 ጊዜ','ቀሪ ≥50 ብር','~1 ሰዓት'], ref_title:'🎁 ጓደኛ ሽልማት', ref_steps:['ሊንክዎን ያጋሩ','ለ10 ጓደኞች 20 ብር'], fair_title:'⚖️ ፍትሃዊ ጨዋታ', fair_steps:['ማጭበርበር = እገዳ','ቁጥሮች በዘፈቀደ'] },
 
     // ── Admin labels ──
     admin_live:           'ቀጥታ ጨዋታዎች',
@@ -3196,7 +3196,6 @@ function toggleLang() {
 
 /* ── renderInstructions: builds instructions screen from t() ── */
 function renderInstructions() {
-  console.log('renderInstructions called');
   const tx = t('instructions_text');
   if (!tx || typeof tx !== 'object') return;
   const body = document.getElementById('instr-body');
