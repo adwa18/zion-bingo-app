@@ -1538,13 +1538,13 @@ function renderHeader() {
 function renderNav() {
   const u = S.user;
   const items = [
-    { icon:'🎮', label:t('nav_play'),         screen:'screen-lobby',       fn:'goToLobby' },
+    { icon:'🎮', label:t('nav_play'),           screen:'screen-lobby',       fn:'goToLobby' },
     { icon:'💰', label:t('nav_deposit'),        screen:'screen-deposit',     fn:'loadDeposit' },
     { icon:'💳', label:t('nav_withdraw'),       screen:'screen-withdraw',    fn:'loadWithdraw' },
-    { icon:'📨', label:t('nav_friends'), screen:'screen-friends',     fn:'loadFriends' },
+    { icon:'📨', label:t('nav_friends'),        screen:'screen-friends',     fn:'loadFriends' },
     { icon:'🏆', label:t('nav_leaderboard'),    screen:'screen-leaderboard', fn:'loadLeaderboard' },
     { icon:'📜', label:t('nav_history'),        screen:'screen-history',     fn:'loadHistory' },
-    { icon:'📖', label:t('nav_instructions'), screen:'screen-instructions', fn:'renderInstructions' },
+    { icon:'📖', label:t('nav_instructions'),   screen:'screen-instructions', fn:'renderInstructions' },
   ];
   if (u?.is_admin) items.push({ icon:'⚙️', label:t('nav_admin'), screen:'screen-admin', fn:'loadAdmin' });
   
@@ -1646,6 +1646,7 @@ async function submitWithdraw() {
 }
 
 async function loadFriends() {
+  console.log('loadFriends called');
   try {
     const stats=await api('GET','/api/referral-stats');
     document.getElementById('friends-count').textContent=stats.referral_count||0;
@@ -2468,6 +2469,7 @@ function goToHistory() { loadHistory(); showScreen('screen-history'); }
    ADMIN
 ══════════════════════════════════════════════════════════ */
 async function loadAdmin() {
+  console.log('loadAdmin called');
   loadAdminStats(); loadAdminGames(); loadAdminUsers();
   const adminCard = document.getElementById('admin-manage-admins-card');
   if (adminCard) adminCard.style.display = (S.user?.is_owner || S.user?.is_admin) ? 'block' : 'none';
@@ -3194,6 +3196,7 @@ function toggleLang() {
 
 /* ── renderInstructions: builds instructions screen from t() ── */
 function renderInstructions() {
+  console.log('renderInstructions called');
   const tx = t('instructions_text');
   if (!tx || typeof tx !== 'object') return;
   const body = document.getElementById('instr-body');
