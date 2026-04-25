@@ -1125,7 +1125,7 @@ body::before {
         <div class="card-title" id="friends-title">📨 Invite Friends</div>
         <div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:14px;text-align:center">
           <div style="font-size:28px">🎁</div>
-          <div style="font-size:13px;font-weight:700;color:var(--text);margin:6px 0">span data-i18n="friends_earn_static" data-i18n="friends_earn_static">Earn 20 ETB every 10 friends!</span>/div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin:6px 0" data-i18n="friends_earn_static">Earn 20 ETB every 10 friends!</div>
           <div style="font-size:11px;color:var(--text2)" data-i18n="friends_earn_sub">Share your link → they register → you earn</div>
         </div>
         <div style="margin-bottom:14px">
@@ -1428,7 +1428,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 ══════════════════════════════════════════════════════════ */
 async function handleWelcomeClick() {
   const btn = document.getElementById('btn-welcome');
-  btn.textContent = '⏳ Connecting…'; btn.disabled = true;
+  btn.textContent = t('btn_connecting'); btn.disabled = true;
   const errEl = document.getElementById('welcome-error');
   if (errEl) errEl.style.display = 'none';
   try {
@@ -1451,10 +1451,10 @@ async function handleWelcomeClick() {
     const msg = e.message || 'Connection failed. Please try again.';
     if (errEl) { errEl.textContent = '⚠️ ' + msg; errEl.style.display = 'block'; }
     else toast(msg, 'error');
-    btn.textContent = 'RETRY →'; btn.disabled = false;
+    btn.textContent = t('btn_retry'); btn.disabled = false;
     return;
   }
-  btn.textContent = 'START PLAYING →'; btn.disabled = false;
+  btn.textContent = t('btn_start'); btn.disabled = false;
 }
 
 function requestTgPhone() {
@@ -1665,18 +1665,20 @@ async function loadFriends() {
     const fill = document.getElementById('ref-progress');
     if (fill) fill.style.width = `${progress}%`;
     const msg = document.getElementById('ref-next-message');
-    if (msg) msg.textContent = `${per - (rc % per)} more referrals until +${stats.bonus_amount} ETB!`;
+    if (msg) msg.textContent = _lang === 'am'
+      ? `${per-(rc%per)} ጓደኞች ሲጋብዙ +${stats.bonus_amount} ብር!`
+      : `${per-(rc%per)} more referrals until +${stats.bonus_amount} ETB!`;
   } catch(e){ toast(t('toast_no_friends'),'error'); }
 }
 function copyReferralLink() {
-  const t=document.getElementById('friends-link')?.textContent||'';
-  if(navigator.clipboard)navigator.clipboard.writeText(t).then(()=>toast('Copied!','success'));
-  else toast(t,'info');
+  const link=document.getElementById('friends-link')?.textContent||'';
+  if(navigator.clipboard)navigator.clipboard.writeText(link).then(()=>toast(t('toast_copied','Link'),'success'));
+  else toast(link,'info');
 }
 function shareReferralTelegram() {
-  const t=document.getElementById('friends-link')?.textContent||'';
+  const link=document.getElementById('friends-link')?.textContent||'';
   const msg='Join Joker Bingo 🎱 and win ETB!\n🎁 Get 10% bonus on your first deposit!\n\nበ 10 ብር ቦነስ ጀምሩ! ለመጀመሪያ ዲፖዚት 10% ቦነስ! ጓደኛ ሲጋብዙ ሌላ ቦነስ! የጋበዙት ጓደኛ ዲፖዚት ሲያደርግ ለናንተ ቦነስ! ይጫወቱ! ያሸንፉ!';
-  const url=`https://t.me/share/url?url=${encodeURIComponent(t)}&text=${encodeURIComponent(msg)}`;
+  const url=`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(msg)}`;
   if(window.Telegram?.WebApp?.openTelegramLink)window.Telegram.WebApp.openTelegramLink(url);
   else window.open(url,'_blank');
 }
@@ -3307,102 +3309,6 @@ function applyLang() {
   const lb2 = document.getElementById('leave-btn');
   if (lb2) lb2.textContent = t(window._gameIsActive ? 'btn_forfeit' : 'btn_leave');
 }
-  // Language toggle button
-  const lb = document.getElementById('lang-btn');
-  if (lb) lb.textContent = t('lang_toggle');
-
-  // Static HTML elements
-  const map = {
-    'btn-welcome':        t('btn_start'),
-    'btn-create-acct':    t('btn_create'),
-    'btn-preview':        t('btn_preview'),
-    'btn-proceed':        t('btn_proceed'),
-    'btn-back-lobby':     t('btn_back_lobby'),
-    'game-card-title-label': t('game_card_title'),
-    'leave-modal-title':  t('leave_title'),
-    'leave-confirm-btn':  t('leave_confirm'),
-    'leave-cancel-btn':   t('leave_cancel'),
-    'overlay-msg-static': t('overlay_msg'),
-  };
-  Object.entries(map).forEach(([id, txt]) => {
-    const el = document.getElementById(id);
-    if (el && txt) el.textContent = txt;
-  });
-
-  // Placeholders
-  const phs = {
-    'input-username': t('reg_username_ph'),
-    'input-phone':    t('reg_phone_ph'),
-    'dep-sender-name':t('dep_name_ph'),
-    'dep-amount':     t('dep_amount_ph'),
-    'dep-ref':        t('dep_ref_ph'),
-    'wd-phone':       t('wd_phone_ph'),
-    'wd-account-name':t('wd_name_ph'),
-    'wd-amount':      t('wd_amount_ph'),
-  };
-  Object.entries(phs).forEach(([id, ph]) => {
-    const el = document.getElementById(id);
-    if (el) el.placeholder = ph;
-  });
-
-  // Labels
-  const labels = {
-    'reg-username-label': t('reg_username_label'),
-    'reg-phone-label':    t('reg_phone_label'),
-    'reg-phone-hint':     t('reg_phone_hint'),
-    'reg-footer-hint':    t('reg_footer'),
-    'reg-bonus-badge':    t('reg_bonus'),
-    'lobby-bet-title':    t('lobby_bet_title'),
-    'picker-title':       t('picker_title'),
-    'dep-title':          t('dep_title'),
-    'dep-send-to':        t('dep_send_to'),
-    'wd-title':           t('wd_title'),
-    'friends-title':      t('friends_title'),
-    'friends-link-label': t('friends_link_label'),
-    'friends-count-lbl':  t('friends_count'),
-    'friends-next-lbl':   t('friends_next'),
-    'friends-recent-lbl': t('friends_recent'),
-    'lb-title':           t('lb_title'),
-    'history-title':      t('hist_title'),
-    'leave-forfeit-warn': t('leave_forfeit_warn'),
-    'game-starts-in':     t('game_starts_in'),
-    'game-called-label':  t('game_called'),
-    'picker-taken-hint':  t('picker_taken'),
-    'picker-nums-hint':   t('picker_nums'),
-    'picker-card1-label': t('picker_card1'),
-    'picker-card2-label': t('picker_card2'),
-    'picker-dual-title':  t('picker_dual_title'),
-    'picker-dual-sub':    t('picker_dual_sub'),
-    'btn-submit-dep':     t('btn_submit_dep'),
-    'btn-submit-wd':      t('btn_submit_wd'),
-    'btn-cbe':            t('btn_cbe'),
-    'btn-telebirr':       t('btn_telebirr'),
-    'btn-copy-link':      t('btn_copy'),
-    'btn-share-link':     t('btn_share'),
-    'btn-play-again':     t('btn_play_again'),
-    'btn-change-lucky':   t('btn_change_lucky'),
-    'btn-back-lobby-result': t('btn_back_lobby'),
-    'btn-view-history':   t('btn_view_history'),
-    'profile-stats-lbl':  t('profile_stats'),
-  };
-  Object.entries(labels).forEach(([id, txt]) => {
-    const el = document.getElementById(id);
-    if (el && txt) el.textContent = txt;
-  });
-
-  // Re-render nav (labels change)
-  if (S.user) renderNav();
-  // Re-render lobby bet waiting counts
-  document.querySelectorAll('.bet-players [data-waiting]').forEach(el => {
-    el.nextSibling && (el.nextSibling.textContent = ' ' + t('lobby_waiting'));
-  });
-  // Stat box labels
-  ['profile-lbl-games','profile-lbl-wins','profile-lbl-wr','profile-lbl-won'].forEach((id, i) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = [t('profile_games'), t('profile_wins'), t('profile_wr'), t('profile_won')][i];
-  });
-}
-
 </script>
 </body>
 </html>
